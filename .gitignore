@@ -1,0 +1,15 @@
+# dependencies
+node_modules
+.vscode
+
+# logs
+npm-debug.log
+
+# Nuxt build
+.nuxt
+
+# Nuxt generate
+dist
+
+# Backpack build
+build

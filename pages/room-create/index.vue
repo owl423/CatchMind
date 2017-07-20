@@ -7,7 +7,7 @@
           <input class="input" id="room-name" v-model="roomName" type="text">
         </div>
         <div class="button-group">
-          <a class="button is-primary is-outlined create-btn">만들기</a>
+          <a class="button is-primary is-outlined create-btn" @click="createRoom">만들기</a>
           <router-link to="/room" class="button is-danger is-outlined">취소</router-link>
         </div>
       </div>
@@ -15,11 +15,27 @@
 </template>
 
 <script>
+import {mapActions, mapGetters} from 'vuex';
 export default {
   data(){
     return {
-      roomName: ''
+      inputRoomName: ''
     };
+  },
+  computed: {
+    ...mapGetters([
+      'roomName',
+      'roomList',
+      'roomUserList'
+    ])
+  },
+  methods : {
+    ...mapActions([
+      'getRoomList'
+    ]),
+    createRoom(){
+      this.getRoomList();
+    }
   }
 };
 </script>

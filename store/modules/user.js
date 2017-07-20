@@ -15,8 +15,26 @@ export default {
     }
   },
   actions: {
-    async chkNickName ({state, rootState, commit, dispatch}, inputNickName) {
-      let {data} = await axios.get('/api/nickname');
+    getNickName (){
+      return new Promise(function(resolve, reject){
+        axios.get('/api/user_list')
+        .then(function(data){
+          resolve(data);
+        })
+        .catch(function(){
+          reject('getNickNameError');
+        });
+      });
+    },
+    chkNickName ({state, rootState, commit, dispatch}, inputNickName) {
+      dispatch('getNickName')
+      .then(function(data){
+        console.log('data: ', data);
+      })
+      .catch(function(error){
+        console.log('error: ', error);
+      });
+      
       let chkDuplicate = false;
       data.forEach((nickName) => {
         if (nickName === inputNickName) {

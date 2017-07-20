@@ -1,3 +1,5 @@
+import axios from '~plugins/axios';
+
 export default {
   state: {
     roomName: '',
@@ -30,6 +32,15 @@ export default {
     },
     removeRoomUserList (state, userName) {
       return state.roomUserList.indexOf(userName) > -1 ? state.roomUserList.splice(state.roomUserList.indexOf(userName), 1) : false; // eslint ignore:line
+    }
+  },
+  actions: {
+    async getRoomList(){
+      let {data} = await axios.get('/api/roomlist');
+      return data;
+    },
+    chkRoomName({state, commit, dispatch, rootState}, inputRoomName){
+      console.log('inputRoomName: ', inputRoomName);
     }
   }
 };

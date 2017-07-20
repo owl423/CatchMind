@@ -80,7 +80,8 @@ export default {
     changeDetect(){
       this.chkDuplicate = 'default';
     },
-    duplicateChk () {
+    duplicateChk(){
+      console.log('this: ', this);
       // const socket = io.connect()
       // console.log(socket)
       // socket.on('news', function (data) {

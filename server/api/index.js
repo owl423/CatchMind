@@ -1,12 +1,13 @@
 import { Router } from 'express'
 
 import users from './users'
-import username from './username'
-
+import user from './user'
+import room from './room'
 var router = Router()
 
 // Add USERS Routes
 router.use(users)
-router.use(username)
+router.use(user)
+router.use(room)
 
 export default router

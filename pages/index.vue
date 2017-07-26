@@ -13,9 +13,7 @@
             <i :class="['fa', isDuplicate ? 'fa-warning' : 'fa-check']"></i>
           </span>
         </p>
-        <p v-if="chkDuplicate === false" class="help is-success">사용할 수 있는 닉네임입니다.</p>
-        <p v-else-if="chkDuplicate === true" class="help is-danger">사용할 수 없는 닉네임입니다.</p>
-        <p v-else-if="chkDuplicate === 'notDuplicateChk'" class="help is-danger"> 중복확인을 해주세요.</p>
+        <p v-if="infoMessage" :class="['help', chkDuplicate ? 'is-danger' : 'is-success']">{{ infoMessage }}</p>
         <div class="button-group">
           <button :class="[`button`, `is-primary`, `duplicate-check-btn`, `is-outlined`]" @click="validateNickName">중복확인</button>
           <button type="button" :class="[`button`, `is-outlined`, chkDuplicate === false ? 'is-primary' : 'is-danger']" @click.prevent="saveNickName">입장하기</button>
@@ -33,6 +31,7 @@ export default {
   data () {
     return {
       inputNickName: '',
+      infoMessage: '',
       isDuplicate: 'default'
     };
   },
@@ -79,20 +78,15 @@ export default {
     },
     changeDetect(){
       this.chkDuplicate = 'default';
-    },
-    duplicateChk(){
-      console.log('this: ', this);
-      // const socket = io.connect()
-      // console.log(socket)
-      // socket.on('news', function (data) {
-      //   console.log(data)
-      //   socket.emit('my event', {my: 'data'})
-      // })
+      this.infoMessage = '닉네임 중복확인를 해주세요';
     },
     async validateNickName () {
       if (this.inputNickName.trim()) {
-        this.isDuplicate = await this.chkNickName(this.inputNickName);
-        console.log('this.isDuplicate: ', this.isDuplicate);
+        let data = await this.chkNickName(this.inputNickName);
+        this.isDuplicate = data.duplicate;
+        this.infoMessage = data.result;
+      } else {
+        this.infoMessage = '닉네임을 입력하세요';
       }
       // get 으로 server에서 닉네임 목록 가지고 와서 중복 체크 하기
     }

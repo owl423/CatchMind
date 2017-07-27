@@ -1,12 +1,18 @@
 <template>
   <div class="container">
     <div class="main is-centered">
-      <h1 class="title is-1 main-title room-list-title">방목록</h1>
+      <h1 class="title is-1 main-title room-list-title">방목록 
+        <span class="icon is-large button" @click="getRoomList">
+          <i class="fa fa-refresh" aria-hidden></i>
+        </span>
+      </h1>
       <div class="room-list box">
         <ul v-if="roomList.length !== 0">
-          <li v-for="(room, index) in roomList" :key="room" class="box">
-            {{room.roomName}}
-            <a :href="`room/${room.roomName}`" :title="`${room.roomName}으로 입장`" class="button is-small" @click.prevent="enterRoom(room.roomName)">입장</a>
+          <li v-for="(room, index) in roomList" :key="room">
+            <a :href="`/${room.roomName}`" :title="`${room.roomName}으로 입장`" class="box" @click.prevent.stop="enterRoom(room.roomName)">
+            방제 : {{room.roomName}} 방장 : {{room.masterUser}} 입장인원: {{room.userList.length}}
+            <a :href="`/${room.roomName}`" class="button is-small" @click.prevent="enterRoom(room.roomName)">입장</a>
+            </a>
           </li>
         </ul>
         <p v-else> 생성된 방이 없습니다. 방을 생성해 주세요</p>
@@ -26,12 +32,20 @@ export default {
   created(){
     this.getRoomList();
   },
-  mounted(){
-    console.log('this.roomList: ', this.roomList);
+  beforeRouteEnter: (to, from, next) => {
+    next((vm)=>{
+      vm.setRoomName('');
+      if(vm.nickName){
+        vm.$router.push({path: `/room`});
+      } else {
+        vm.$router.push('/');
+      }
+    });
   },
   computed: {
     ...mapGetters([
-      'roomList'
+      'roomList',
+      'nickName'
     ])
   },
   methods: {
@@ -48,8 +62,7 @@ export default {
     enterRoom(roomName){
       this.setIsRoomCreate(true);
       this.setRoomName(roomName);
-      console.log('roomName: ', roomName);
-      this.$router.push({path: `room/${roomName}`});
+      this.$router.push({path: `/room/${roomName}`});
     }
   }
 };

@@ -19,10 +19,11 @@
       <div class="chat-wrapper">
         <h2 class="message-header">채팅창</h2>
         <div class="chat message-body">
-            <textarea name="" id="" readonly class="textarea chat-log"></textarea>
-            <form class="input-wrapper">
-              <label for="chat-input" class="a11y-hidden">채팅 입력창</label><input type="text" id="chat-input" class="input is-small">
-              <button type="button" class="button is-small">전송</button>
+            <textarea name="" id="chatLog" readonly class="textarea chat-log"></textarea>
+            <form class="input-wrapper" @submit.prevent>
+              <label for="chatInput" class="a11y-hidden">채팅 입력창</label>
+              <input type="text" id="chatInput" class="input is-small" :value="msg" @input="msgUpdate" @keyup.enter="sendMsg">
+              <button type="button" class="button is-small" @click="sendMsg">전송</button>
             </form>
         </div>
       </div>
@@ -35,26 +36,48 @@
 <script>
 import io from 'socket.io-client';
 import {mapActions, mapGetters, mapMutations} from 'vuex';
+function msgReform(nickName, msg){
+  return `\n${nickName} : ${msg}`;
+}
 export default {
   data(){
     return {
-      socket: null
+      socket: null,
+      msg: '',
+      chatLog: '',
     };
   },
   mounted(){
+    // 소켓 생성
     const socket = this.socket = io.connect();
     const nickName = this.nickName;
     const roomName = this.roomName;
-    // const userObj = {
-    //   nickName
-    // };
-    // console.log('socket: ', socket);
-    // this.registRoomUser(userObj);
     socket.emit('entrance', {nickName, roomName});
     socket.on('entrance', (data)=>{
-      console.log('data: ', data);
+      // userList 갱신
       this.setRoomUserList(data.userList);
     });
+    socket.on('disconnect', (data)=>{
+      // userList 갱신
+      this.setRoomUserList(data.userList);
+    });
+    socket.on('resMsg', (data)=>{
+      chatLog.value += msgReform(data.nickName, data.msg);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    });
+  },
+  beforeRouteEnter: (to, from, next) => {
+    next((vm)=>{
+      if(vm.nickName && vm.roomName){
+        vm.$router.push(`/room/${vm.roomName}`);
+      } else {
+        vm.$router.push('/');
+      }
+    });
+  },
+  destroyed(){
+    console.log('죽음');
+    this.socket.disconnect();
   },
   computed: {
     ...mapGetters([
@@ -62,7 +85,7 @@ export default {
       'nickName',
       'roomUserList',
       'isRoomCreate'
-    ])
+    ]),
   },
   methods:{
     ...mapActions([
@@ -70,8 +93,23 @@ export default {
       'getRoom'
     ]),
     ...mapMutations([
-      'setRoomUserList'
-    ])
+      'setRoomUserList',
+      'setRoomName'
+    ]),
+    msgUpdate(e){
+      this.msg = e.target.value;
+    },
+    sendMsg(){
+      if(this.msg.trim()){
+        let msg = {
+          roomName: this.roomName,
+          nickName: this.nickName,
+          msg: this.msg
+        };
+        this.socket.emit('sendMsg', msg);
+        this.msg = '';
+      }
+    }
   }
 };
 </script>

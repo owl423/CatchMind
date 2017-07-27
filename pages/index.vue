@@ -41,6 +41,9 @@ export default {
       this.isDuplicate = false;
     }
   },
+  beforeRouteEnter: (to, from, next) => {
+    next();
+  },
   computed: {
     ...mapGetters([
       'nickName'

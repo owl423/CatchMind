@@ -30,6 +30,15 @@ export default {
       'nickName'
     ])
   },
+  beforeRouteEnter(to, from, next) {
+    next(vm=>{
+      if(from.name === 'room'){
+        vm.$router.push('/room-create');
+      } else {
+        vm.$router.push('/room');
+      }
+    });
+  },
   methods : {
     ...mapActions([
       'chkRoomName',

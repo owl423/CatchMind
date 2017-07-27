@@ -41,6 +41,7 @@ export default {
     async getRoomList({commit}){
       let {data} = await axios.get('/api/roomList');
       commit('setRoomList', data);
+      console.log('get room list data: ', data);
       return data;
     },
     async getRoom({commit}, roomName){

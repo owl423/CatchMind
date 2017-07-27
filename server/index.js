@@ -36,6 +36,7 @@ async function start() {
 
   io.on('connection', function(socket){
     console.log('connection');
+    // 입장 소켓 이벤트
     socket.on('entrance', (data)=>{
       socket.join(data.roomName);
       console.log('roomList: ', roomList);
@@ -45,25 +46,37 @@ async function start() {
           nickName: data.nickName,
           socketID: socket.id
         });
+        // 해당 룸 사람들에게 새로 입장한 사람의 정보 알려줌
         io.to(data.roomName).emit('entrance', room);
       }
       console.log('room: ', room);
     });
-    // socket.on('disconnect',()=>{
-    //   let room;
-    //   for(let i =0, l = roomList.length; i < l; i++ ){
-    //     let r = roomList[i].userList.length;
-    //     for(let j = 0; j < r; j++){
-    //       if(userList[j].socketID === socket.id){
-    //         userList.splice(j, 1);
-    //         room = roomList[i];
-    //         break;
-    //       }
-    //     }
-    //   }
-    //   console.log('room: ', room);
-    //   io.to(room.roomName).emit('entrance', room);
-    // });
+    // 채팅 메시지
+    socket.on('sendMsg', (data)=>{
+      io.to(data.roomName).emit('resMsg', data);
+    });
+    // 연결이 끊어졌을 경우
+    socket.on('disconnect',()=>{
+      console.log('방나감');
+      let exitUser;
+      // 나간 방을 찾아서
+      let exitRoom = roomList.find((room)=>{
+        // 나간 유저를 socketid로 찾는다.
+        return exitUser = room.userList.find((user)=>user.socketID === socket.id);
+      });
+      // 방에서 나간 유저 제거
+      if(exitRoom){
+        exitRoom.userList.splice(exitRoom.userList.findIndex((user)=> user === exitUser), 1);
+        if(exitRoom.userList.length === 0){
+          roomList.splice(roomList.findIndex(room => room === exitRoom), 1);
+        } else if( exitUser.nickName === exitRoom.masterUser){
+          exitRoom.masterUser = exitRoom.userList[0];
+        }
+        // 해당 room에 속한 사람들에게 전파
+        io.to(exitRoom.roomName).emit('disconnect', exitRoom);
+      }
+    });
+
   });
 }
 

@@ -39,7 +39,6 @@ async function start() {
     // 입장 소켓 이벤트
     socket.on('entrance', (data)=>{
       socket.join(data.roomName);
-      console.log('roomList: ', roomList);
       const room = roomList.find((room)=>room.roomName === data.roomName);
       if(room){
         room.userList.push({
@@ -49,7 +48,6 @@ async function start() {
         // 해당 룸 사람들에게 새로 입장한 사람의 정보 알려줌
         io.to(data.roomName).emit('entrance', room);
       }
-      console.log('room: ', room);
     });
     // 채팅 메시지
     socket.on('sendMsg', (data)=>{
@@ -57,7 +55,6 @@ async function start() {
     });
     // 연결이 끊어졌을 경우
     socket.on('disconnect',()=>{
-      console.log('방나감');
       let exitUser;
       // 나간 방을 찾아서
       let exitRoom = roomList.find((room)=>{

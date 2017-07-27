@@ -9,7 +9,9 @@
     "build": "nuxt build && backpack build",
     "start": "cross-env NODE_ENV=production node build/main.js",
     "precommit": "npm run lint",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore ."
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "forever": "forever start build/main.js",
+    "foreverstop": "forever stop build/main.js"
   },
   "dependencies": {
     "axios": "^0.16.1",

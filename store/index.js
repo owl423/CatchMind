@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
-import room from './modules/room.js';
-import user from './modules/user.js';
+import room from './room.js';
+import user from './user.js';
 const store = () => new Vuex.Store({
   modules: {
     room,

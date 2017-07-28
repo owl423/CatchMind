@@ -15,10 +15,10 @@
             </a>
           </li>
         </ul>
-        <p v-else> 생성된 방이 없습니다. 방을 생성해 주세요</p>
+        <p v-else>생성된 방이 없습니다. 방을 생성해 주세요</p>
       </div>
       <div class="button-group">
-        <a class="button is-primary is-medium is-outlined" @click="createRoom"> 방 만들러 가기</a>
+        <a class="button is-primary is-medium is-outlined" @click="createRoom">방 만들러 가기</a>
       </div>
     </div>
   </div>
@@ -36,7 +36,7 @@ export default {
     next((vm)=>{
       vm.setRoomName('');
       if(vm.nickName){
-        vm.$router.push({path: `/room`});
+        vm.$router.push({path: `/room-list`});
       } else {
         vm.$router.push('/');
       }
@@ -62,7 +62,7 @@ export default {
     enterRoom(roomName){
       this.setIsRoomCreate(true);
       this.setRoomName(roomName);
-      this.$router.push({path: `/room/${roomName}`});
+      this.$router.push({path: `/room-list/${roomName}`});
     }
   }
 };

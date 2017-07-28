@@ -5,14 +5,14 @@ import socket from 'socket.io';
 import api from './api';
 import bodyParser from 'body-parser';
 import {userList, roomList} from './memorydb';
-// import multer from 'multer';
+import multer from 'multer';
 const app = express();
 const host = process.env.HOST || '0.0.0.0';
 const port = process.env.PORT || 3000;
 
 let server = http.Server(app);
 let io = socket(server);
-// let upload = multer({dest: './upload'});
+let upload = multer({dest: './upload'});
 app.set('port', port);
 
 // Import API Routes
@@ -46,7 +46,7 @@ async function start() {
           socketID: socket.id
         });
         // 해당 룸 사람들에게 새로 입장한 사람의 정보 알려줌
-        io.to(data.roomName).emit('entrance', room);
+        io.to(data.roomName).emit('entrance', {room, enterUser: data.nickName});
       }
     });
     // 채팅 메시지
@@ -67,10 +67,11 @@ async function start() {
         if(exitRoom.userList.length === 0){
           roomList.splice(roomList.findIndex(room => room === exitRoom), 1);
         } else if( exitUser.nickName === exitRoom.masterUser){
-          exitRoom.masterUser = exitRoom.userList[0];
+          exitRoom.masterUser = exitRoom.userList[0].nickName;
         }
         // 해당 room에 속한 사람들에게 전파
-        io.to(exitRoom.roomName).emit('disconnect', exitRoom);
+        socket.leave(exitRoom.roomName);
+        io.to(exitRoom.roomName).emit('disconnect', {room: exitRoom, exitUser});
       }
     });
 

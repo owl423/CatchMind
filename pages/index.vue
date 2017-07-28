@@ -69,11 +69,11 @@ export default {
       if (this.chkDuplicate === 'default') {
         this.chkDuplicate = 'notDuplicateChk';
       } else if(this.nickName && (this.chkDuplicate === false)){
-        this.$router.push({ path: '/room' });
+        this.$router.push({ path: '/room-list' });
       } else if (this.chkDuplicate === false) {
         let registChk = await this.registNickName(this.inputNickName);
         if (registChk) {
-          this.$router.push({ path: '/room' });
+          this.$router.push({ path: '/room-list' });
         } else {
           this.chkDuplicate = 'notDuplicateChk';
         }

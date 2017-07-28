@@ -39,7 +39,6 @@ router.post('/roomList',function(req, res){
 });
 router.get('roomList/:roomName', function(req, res){
   const room = roomList.find((room)=>room.roomName === req.params.roomName);
-  console.log('room: ', room);
   if (room){
     res.json({
       room,

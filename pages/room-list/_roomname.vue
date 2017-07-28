@@ -1,50 +1,37 @@
 <template>
 <div class="wrapper">
   <div v-if="isRoomCreate" class="room-wrapper">
-    <div class="board-wrapper message">
-      <h2 class="message-header">보드</h2>
-      <canvas class="box message-body canvas"></canvas>
-    </div>
+    <board :socket="socket"></board>
     <div class="message chat-user-list-wrapper">
-      <div class="user-list-wrapper">
-        <h2 class="message-header"> 유저 목록</h2>
-        <ul class="box user-list message-body">
-          <li 
-            v-for="user in roomUserList"
-            :key="user">
-            {{user.nickName}}
-          </li>
-        </ul>
-      </div>
-      <div class="chat-wrapper">
-        <h2 class="message-header">채팅창</h2>
-        <div class="chat message-body">
-            <textarea name="" id="chatLog" readonly class="textarea chat-log"></textarea>
-            <form class="input-wrapper" @submit.prevent>
-              <label for="chatInput" class="a11y-hidden">채팅 입력창</label>
-              <input type="text" id="chatInput" class="input is-small" :value="msg" @input="msgUpdate" @keyup.enter="sendMsg">
-              <button type="button" class="button is-small" @click="sendMsg">전송</button>
-            </form>
-        </div>
-      </div>
+      <user-list></user-list>
+      <chat :socket="socket" ref="chatWindow"></chat>
     </div>
   </div>
-  <p v-else> 방 생성에 실패 했습니다. 다시 시도해 주세요</p>
+  <p v-else>방 생성에 실패 했습니다. 다시 시도해 주세요</p>
 </div>
 </template>
 
 <script>
 import io from 'socket.io-client';
 import {mapActions, mapGetters, mapMutations} from 'vuex';
+import Chat from '~components/Chat';
+import UserList from '~components/UserList';
+import Board from '~components/Board';
 function msgReform(nickName, msg){
   return `\n${nickName} : ${msg}`;
 }
 export default {
+  components: {
+    Chat,
+    UserList,
+    Board
+  },
   data(){
     return {
       socket: null,
       msg: '',
-      chatLog: '',
+      chatText: '',
+      is_destoyed: false
     };
   },
   mounted(){
@@ -52,38 +39,44 @@ export default {
     const socket = this.socket = io.connect();
     const nickName = this.nickName;
     const roomName = this.roomName;
+    const chatLog = this.$refs.chatWindow.$refs.chatLog;
     socket.emit('entrance', {nickName, roomName});
     socket.on('entrance', (data)=>{
+      // 입장시 chatText로 알려줌
+      chatLog.value += `\n${data.enterUser}님이 입장하셨습니다.`;
       // userList 갱신
-      this.setRoomUserList(data.userList);
+      this.setRoomUserList(data.room.userList);
     });
     socket.on('disconnect', (data)=>{
-      // userList 갱신
-      this.setRoomUserList(data.userList);
+      // 퇴장시 chatText로 알려줌
+      if(!this.is_destoyed){
+        chatLog.value += `\n${data.exitUser.nickName}님이 퇴장하셨습니다.`;
+        // userList 갱신
+        this.setRoomUserList(data.room.userList);
+      }
     });
     socket.on('resMsg', (data)=>{
       chatLog.value += msgReform(data.nickName, data.msg);
-      chatLog.scrollTop = chatLog.scrollHeight;
+      chatLog.scrollTop=chatLog.scrollHeight;
     });
   },
   beforeRouteEnter: (to, from, next) => {
     next((vm)=>{
       if(vm.nickName && vm.roomName){
-        vm.$router.push(`/room/${vm.roomName}`);
+        vm.$router.push(`/room-list/${vm.roomName}`);
       } else {
         vm.$router.push('/');
       }
     });
   },
   destroyed(){
-    console.log('죽음');
+    this.is_destoyed = true;
     this.socket.disconnect();
   },
   computed: {
     ...mapGetters([
       'roomName',
       'nickName',
-      'roomUserList',
       'isRoomCreate'
     ]),
   },
@@ -96,20 +89,6 @@ export default {
       'setRoomUserList',
       'setRoomName'
     ]),
-    msgUpdate(e){
-      this.msg = e.target.value;
-    },
-    sendMsg(){
-      if(this.msg.trim()){
-        let msg = {
-          roomName: this.roomName,
-          nickName: this.nickName,
-          msg: this.msg
-        };
-        this.socket.emit('sendMsg', msg);
-        this.msg = '';
-      }
-    }
   }
 };
 </script>

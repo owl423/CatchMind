@@ -32,10 +32,10 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next(vm=>{
-      if(from.name === 'room'){
+      if(from.name === 'room-list'){
         vm.$router.push('/room-create');
       } else {
-        vm.$router.push('/room');
+        vm.$router.push('/room-list');
       }
     });
   },
@@ -62,7 +62,7 @@ export default {
             userList: []
           };
           this.registRoomName(roomObj);
-          this.$router.push({path: `/room/${this.inputRoomName}`});
+          this.$router.push({path: `/room-list/${this.inputRoomName}`});
         } else {
           // 중복된 이름이 있는 경우
           this.infoMessage = res.result;

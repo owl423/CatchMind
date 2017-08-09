@@ -6,6 +6,7 @@ export default {
     roomList: [],
     roomUserList: [],
     isRoomCreate: null,
+    socket: null
   },
   getters: {
     roomName (state) {
@@ -19,6 +20,9 @@ export default {
     },
     isRoomCreate (state) {
       return state.isRoomCreate;
+    },
+    socket (state) {
+      return state.socket;
     }
   },
   mutations: {
@@ -31,8 +35,11 @@ export default {
     setRoomUserList (state, roomUserList){
       state.roomUserList = roomUserList;
     },
-    setIsRoomCreate(state, bool){
+    setIsRoomCreate (state, bool) {
       state.isRoomCreate = bool;
+    },
+    setSocket (state, socket) {
+      state.socket = socket;
     }
   },
   // 서버와 통신
@@ -41,7 +48,6 @@ export default {
     async getRoomList({commit}){
       let {data} = await axios.get('/api/roomList');
       commit('setRoomList', data);
-      console.log('get room list data: ', data);
       return data;
     },
     async getRoom({commit}, roomName){

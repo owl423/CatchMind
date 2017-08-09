@@ -53,6 +53,10 @@ async function start() {
     socket.on('sendMsg', (data)=>{
       io.to(data.roomName).emit('resMsg', data);
     });
+    // 그림 데이터 정보
+    socket.on('drawing', (data)=>{
+      io.to(data.roomName).emit('drawing', data);
+    });
     // 연결이 끊어졌을 경우
     socket.on('disconnect',()=>{
       let exitUser;

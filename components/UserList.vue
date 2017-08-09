@@ -14,6 +14,7 @@
 <script>
 import {mapGetters} from 'vuex';
 export default {
+  // 데이터
   computed: {
     ...mapGetters([
       'roomUserList'

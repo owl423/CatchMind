@@ -29,9 +29,18 @@ import {mapGetters, mapActions, mapMutations} from 'vuex';
 
 export default {
   name: 'room',
+  // 데이터
+  computed: {
+    ...mapGetters([
+      'roomList',
+      'nickName'
+    ])
+  },
+  // 라이프사이클
   created(){
     this.getRoomList();
   },
+  // 라우팅
   beforeRouteEnter: (to, from, next) => {
     next((vm)=>{
       vm.setRoomName('');
@@ -42,12 +51,7 @@ export default {
       }
     });
   },
-  computed: {
-    ...mapGetters([
-      'roomList',
-      'nickName'
-    ])
-  },
+  // 메서드
   methods: {
     ...mapActions([
       'getRoomList'

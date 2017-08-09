@@ -1,10 +1,10 @@
 <template>
 <div class="wrapper">
   <div v-if="isRoomCreate" class="room-wrapper">
-    <board :socket="socket"></board>
+    <board></board>
     <div class="message chat-user-list-wrapper">
       <user-list></user-list>
-      <chat :socket="socket" ref="chatWindow"></chat>
+      <chat></chat>
     </div>
   </div>
   <p v-else>방 생성에 실패 했습니다. 다시 시도해 주세요</p>
@@ -12,54 +12,27 @@
 </template>
 
 <script>
-import io from 'socket.io-client';
-import {mapActions, mapGetters, mapMutations} from 'vuex';
+import { mapGetters } from 'vuex';
 import Chat from '~components/Chat';
 import UserList from '~components/UserList';
 import Board from '~components/Board';
-function msgReform(nickName, msg){
-  return `\n${nickName} : ${msg}`;
-}
+
 export default {
+  // 하위 컴포넌트
   components: {
     Chat,
     UserList,
     Board
   },
-  data(){
-    return {
-      socket: null,
-      msg: '',
-      chatText: '',
-      is_destoyed: false
-    };
+  // 데이터
+  computed: {
+    ...mapGetters([
+      'roomName',
+      'nickName',
+      'isRoomCreate',
+    ]),
   },
-  mounted(){
-    // 소켓 생성
-    const socket = this.socket = io.connect();
-    const nickName = this.nickName;
-    const roomName = this.roomName;
-    const chatLog = this.$refs.chatWindow.$refs.chatLog;
-    socket.emit('entrance', {nickName, roomName});
-    socket.on('entrance', (data)=>{
-      // 입장시 chatText로 알려줌
-      chatLog.value += `\n${data.enterUser}님이 입장하셨습니다.`;
-      // userList 갱신
-      this.setRoomUserList(data.room.userList);
-    });
-    socket.on('disconnect', (data)=>{
-      // 퇴장시 chatText로 알려줌
-      if(!this.is_destoyed){
-        chatLog.value += `\n${data.exitUser.nickName}님이 퇴장하셨습니다.`;
-        // userList 갱신
-        this.setRoomUserList(data.room.userList);
-      }
-    });
-    socket.on('resMsg', (data)=>{
-      chatLog.value += msgReform(data.nickName, data.msg);
-      chatLog.scrollTop=chatLog.scrollHeight;
-    });
-  },
+  // 라우팅
   beforeRouteEnter: (to, from, next) => {
     next((vm)=>{
       if(vm.nickName && vm.roomName){
@@ -69,27 +42,6 @@ export default {
       }
     });
   },
-  destroyed(){
-    this.is_destoyed = true;
-    this.socket.disconnect();
-  },
-  computed: {
-    ...mapGetters([
-      'roomName',
-      'nickName',
-      'isRoomCreate'
-    ]),
-  },
-  methods:{
-    ...mapActions([
-      'registRoomUser',
-      'getRoom'
-    ]),
-    ...mapMutations([
-      'setRoomUserList',
-      'setRoomName'
-    ]),
-  }
 };
 </script>
 

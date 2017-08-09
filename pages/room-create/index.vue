@@ -18,6 +18,7 @@
 <script>
 import {mapActions, mapGetters, mapMutations} from 'vuex';
 export default {
+  // 데이터
   data(){
     return {
       inputRoomName: '',
@@ -30,6 +31,7 @@ export default {
       'nickName'
     ])
   },
+  // 라우팅
   beforeRouteEnter(to, from, next) {
     next(vm=>{
       if(from.name === 'room-list'){
@@ -39,6 +41,7 @@ export default {
       }
     });
   },
+  // 메소드
   methods : {
     ...mapActions([
       'chkRoomName',

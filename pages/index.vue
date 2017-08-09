@@ -28,21 +28,13 @@ import {mapGetters, mapMutations, mapActions} from 'vuex';
 // import axios from '~plugins/axios'
 // import io from 'socket.io-client'
 export default {
+  // 데이터
   data () {
     return {
       inputNickName: '',
       infoMessage: '',
       isDuplicate: 'default'
     };
-  },
-  mounted(){
-    if(this.nickName){
-      this.inputNickName = this.nickName;
-      this.isDuplicate = false;
-    }
-  },
-  beforeRouteEnter: (to, from, next) => {
-    next();
   },
   computed: {
     ...mapGetters([
@@ -57,6 +49,18 @@ export default {
       }
     }
   },
+  // 라이프사이클
+  mounted(){
+    if(this.nickName){
+      this.inputNickName = this.nickName;
+      this.isDuplicate = false;
+    }
+  },
+  // 라우팅
+  beforeRouteEnter: (to, from, next) => {
+    next();
+  },
+  // 메소드
   methods: {
     ...mapMutations([
       'setNickName'
@@ -91,15 +95,7 @@ export default {
       } else {
         this.infoMessage = '닉네임을 입력하세요';
       }
-      // get 으로 server에서 닉네임 목록 가지고 와서 중복 체크 하기
     }
-    // async asyncData () {
-    //   let { data } = await axios.get('/api/nickname')
-    //   console.log(data)
-    //   return {
-    //     users: data
-    //   }
-    // }
   }
 };
 </script>

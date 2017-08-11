@@ -88,8 +88,9 @@ export default {
       this.infoMessage = '닉네임 중복확인를 해주세요';
     },
     async validateNickName () {
-      if (this.inputNickName.trim()) {
-        let data = await this.chkNickName(this.inputNickName);
+      const inputNickName = this.inputNickName.trim();
+      if (inputNickName) {
+        const data = await this.chkNickName(inputNickName);
         this.isDuplicate = data.duplicate;
         this.infoMessage = data.result;
       } else {

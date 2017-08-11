@@ -57,6 +57,9 @@ async function start() {
     socket.on('drawing', (data)=>{
       io.to(data.roomName).emit('drawing', data);
     });
+    socket.on('clearBoard', (data)=>{
+      io.to(data.roomName).emit('clearBoard');      
+    });
     // 연결이 끊어졌을 경우
     socket.on('disconnect',()=>{
       let exitUser;

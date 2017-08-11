@@ -9,7 +9,7 @@
         </div>
         <div class="button-group">
           <a class="button is-primary is-outlined create-btn" @click="createRoom">만들기</a>
-          <router-link to="/room" class="button is-danger is-outlined">취소</router-link>
+          <router-link to="/room-list" class="button is-danger is-outlined">취소</router-link>
         </div>
       </div>
   </div>

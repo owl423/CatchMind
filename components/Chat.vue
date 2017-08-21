@@ -1,6 +1,6 @@
 <template>
   <div class="chat-wrapper">
-    <h2 class="message-header">채팅창</h2>
+    <h2 class="message-header">대화창</h2>
     <div class="chat message-body">
         <textarea name="" id="chatLog" readonly class="textarea chat-log"></textarea>
         <form class="input-wrapper" @submit.prevent>
@@ -45,6 +45,7 @@ export default {
       chatLog.value += `\n${data.enterUser}님이 입장하셨습니다.`;
       // userList 갱신
       this.setRoomUserList(data.room.userList);
+      this.setMasterNickName(data.room.userList[0].nickName);
       chatLog.scrollTop=chatLog.scrollHeight;
     });
     socket.on('resMsg', (data)=>{
@@ -57,6 +58,7 @@ export default {
         chatLog.value += `\n${data.exitUser.nickName}님이 퇴장하셨습니다.`;
         // userList 갱신
         this.setRoomUserList(data.room.userList);
+        this.setMasterNickName(data.room.userList[0].nickName);        
         chatLog.scrollTop=chatLog.scrollHeight;
       }
     });
@@ -70,6 +72,7 @@ export default {
   methods:{
     ...mapMutations([
       'setRoomUserList',
+      'setMasterNickName',
       'setSocket'
     ]),
     msgUpdate(e){

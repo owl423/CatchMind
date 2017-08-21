@@ -5,9 +5,7 @@ export default {
     nickName: ''
   },
   getters: {
-    nickName (state) {
-      return state.nickName;
-    }
+    nickName: state => state.nickName
   },
   mutations: {
     setNickName (state, name) {

@@ -5,25 +5,19 @@ export default {
     roomName: '',
     roomList: [],
     roomUserList: [],
+    writerNickName: '',
+    masterNickName: '',
     isRoomCreate: null,
     socket: null
   },
   getters: {
-    roomName (state) {
-      return state.roomName;
-    },
-    roomList (state) {
-      return state.roomList;
-    },
-    roomUserList (state) {
-      return state.roomUserList;
-    },
-    isRoomCreate (state) {
-      return state.isRoomCreate;
-    },
-    socket (state) {
-      return state.socket;
-    }
+    roomName: state => state.roomName,
+    roomList: state => state.roomList,
+    roomUserList: state => state.roomUserList,
+    isRoomCreate: state => state.isRoomCreate,
+    socket: state => state.socket,
+    writerNickName: state => state.writerNickName,
+    masterNickName: state => state.masterNickName
   },
   mutations: {
     setRoomName (state, name) {
@@ -32,7 +26,7 @@ export default {
     setRoomList (state, roomList) {
       state.roomList = roomList;
     },
-    setRoomUserList (state, roomUserList){
+    setRoomUserList (state, roomUserList) {
       state.roomUserList = roomUserList;
     },
     setIsRoomCreate (state, bool) {
@@ -40,6 +34,12 @@ export default {
     },
     setSocket (state, socket) {
       state.socket = socket;
+    },
+    setWriterNickName (state, writerNickName) {
+      state.writerNickName = writerNickName;
+    },
+    setMasterNickName (state, masterNickName) {
+      state.masterNickName = masterNickName;
     }
   },
   // 서버와 통신
@@ -51,7 +51,6 @@ export default {
       return data;
     },
     async getRoom({commit}, roomName){
-      console.log('`/api/roomList/${roomName}`: ', `/api/roomList/${roomName}`);
       let {data} = await axios.get(`/api/roomList/${roomName}`);
       console.log('get room data: ', data);
     },

@@ -13,9 +13,7 @@
             <i :class="['fa', isDuplicate ? 'fa-warning' : 'fa-check']"></i>
           </span>
         </p>
-        <p v-if="chkDuplicate === false" class="help is-success">사용할 수 있는 닉네임입니다.</p>
-        <p v-else-if="chkDuplicate === true" class="help is-danger">사용할 수 없는 닉네임입니다.</p>
-        <p v-else-if="chkDuplicate === 'notDuplicateChk'" class="help is-danger"> 중복확인을 해주세요.</p>
+        <p v-if="infoMessage" :class="['help', chkDuplicate ? 'is-danger' : 'is-success']">{{ infoMessage }}</p>
         <div class="button-group">
           <button :class="[`button`, `is-primary`, `duplicate-check-btn`, `is-outlined`]" @click="validateNickName">중복확인</button>
           <button type="button" :class="[`button`, `is-outlined`, chkDuplicate === false ? 'is-primary' : 'is-danger']" @click.prevent="saveNickName">입장하기</button>
@@ -30,17 +28,13 @@ import {mapGetters, mapMutations, mapActions} from 'vuex';
 // import axios from '~plugins/axios'
 // import io from 'socket.io-client'
 export default {
+  // 데이터
   data () {
     return {
       inputNickName: '',
+      infoMessage: '',
       isDuplicate: 'default'
     };
-  },
-  mounted(){
-    if(this.nickName){
-      this.inputNickName = this.nickName;
-      this.isDuplicate = false;
-    }
   },
   computed: {
     ...mapGetters([
@@ -55,6 +49,18 @@ export default {
       }
     }
   },
+  // 라이프사이클
+  mounted(){
+    if(this.nickName){
+      this.inputNickName = this.nickName;
+      this.isDuplicate = false;
+    }
+  },
+  // 라우팅
+  beforeRouteEnter: (to, from, next) => {
+    next();
+  },
+  // 메소드
   methods: {
     ...mapMutations([
       'setNickName'
@@ -67,11 +73,11 @@ export default {
       if (this.chkDuplicate === 'default') {
         this.chkDuplicate = 'notDuplicateChk';
       } else if(this.nickName && (this.chkDuplicate === false)){
-        this.$router.push({ path: '/room' });
+        this.$router.push({ path: '/room-list' });
       } else if (this.chkDuplicate === false) {
         let registChk = await this.registNickName(this.inputNickName);
         if (registChk) {
-          this.$router.push({ path: '/room' });
+          this.$router.push({ path: '/room-list' });
         } else {
           this.chkDuplicate = 'notDuplicateChk';
         }
@@ -79,30 +85,18 @@ export default {
     },
     changeDetect(){
       this.chkDuplicate = 'default';
-    },
-    duplicateChk(){
-      console.log('this: ', this);
-      // const socket = io.connect()
-      // console.log(socket)
-      // socket.on('news', function (data) {
-      //   console.log(data)
-      //   socket.emit('my event', {my: 'data'})
-      // })
+      this.infoMessage = '닉네임 중복확인를 해주세요';
     },
     async validateNickName () {
-      if (this.inputNickName.trim()) {
-        this.isDuplicate = await this.chkNickName(this.inputNickName);
-        console.log('this.isDuplicate: ', this.isDuplicate);
+      const inputNickName = this.inputNickName.trim();
+      if (inputNickName) {
+        const data = await this.chkNickName(inputNickName);
+        this.isDuplicate = data.duplicate;
+        this.infoMessage = data.result;
+      } else {
+        this.infoMessage = '닉네임을 입력하세요';
       }
-      // get 으로 server에서 닉네임 목록 가지고 와서 중복 체크 하기
     }
-    // async asyncData () {
-    //   let { data } = await axios.get('/api/nickname')
-    //   console.log(data)
-    //   return {
-    //     users: data
-    //   }
-    // }
   }
 };
 </script>

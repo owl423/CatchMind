@@ -13,7 +13,7 @@ module.exports = {
   // add your custom rules here
   rules: {
     "semi": [2, "always"],
-    "no-console": ["error", { allow: ["warn", "error", "log"] }],
+    "no-console": ["error", { allow: ["warn", "error", "log", "dir"] }],
     "no-undef": 0
   },
   globals: {}

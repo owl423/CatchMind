@@ -5,7 +5,7 @@ import socket from 'socket.io';
 import api from './api';
 import bodyParser from 'body-parser';
 import {quizList, roomList} from './memorydb';
-import {random, findRoom} from './util';
+import {random, findRoom, leaveRoom} from './util';
 import multer from 'multer';
 const app = express();
 const host = process.env.HOST || '0.0.0.0';
@@ -73,7 +73,7 @@ async function start() {
       room.isStart = true;
       room.quizList = [quiz];
       room.writer = room.userList[0];
-      room.remainQuizConunt = room.userList.length;
+      room.remainQuizCount = data.quizCount;
       io.to(data.roomName).emit('gameStart', {quiz});
     });
     socket.on('answerCheck', (data)=>{
@@ -81,36 +81,45 @@ async function start() {
       const roomQuizList = room.quizList;
       const answerCheck = data.answer === roomQuizList[roomQuizList.length-1];
       let sendData;
-      console.log('answerCheck: ', answerCheck);
       if(answerCheck){
+        // room의 remainQuizCount 값을 감소 시키고
+        room.remainQuizCount--;
+        // 0일경우 게임이 종료 되는 이벤트 발생하는 코드 작성 부분
         if(room.remainQuizCount === 0){
-          // room의 remainQuizCount 값을 감소 시키고
-          // 0일경우 게임이 종료 되는 이벤트 발생하는 코드 작성 부분
+          room.isStart = false;
+          io.to(data.roomName).emit('gameover');
         } else {
-          let quiz = quizList[random(quizList.length)];
-          let writerIndex = room.userList.findIndex(roomUser => roomUser === room.writer);
-          let nextWriter = room.writer = room.userList[(writerIndex + 1) % room.userList.length];
+          const writerIndex = room.userList.findIndex(roomUser => roomUser === room.writer);
+          const nextWriter = room.writer = room.userList[(writerIndex + 1) % room.userList.length];
+          let quiz;
           // 퀴즈 리스트에 기존에 출제 됐던 문제가 있는 지 확인해서 없는 문제로 생성
-          while(roomQuizList.findIndex(roomQuiz => roomQuiz === quiz) !== -1){
+          do{
             quiz = quizList[random(quizList.length)];
           }
+          while(roomQuizList.findIndex(roomQuiz => roomQuiz === quiz) !== -1);
           roomQuizList.push(quiz);
           sendData = {
             answer: true,
-            quiz,
-            writerNickName : nextWriter.nickName
+            nickName: data.nickName,
+            writerNickName : nextWriter.nickName,
+            quiz
           };
         }
       } else {
         // 정답이 아닌경우
         // io.to(data.roomName).emit('answerCheck', {answer: false});
-        sendData = {answer : false};
+        sendData = {
+          answer : false,
+          nickName: data.nickName,
+          wrongAnswer: data.answer
+        };
       }
       io.to(data.roomName).emit('answerCheck', sendData);
+      io.to(data.roomName).emit('answerResult', sendData);
     });
     // 연결이 끊어졌을 경우
     socket.on('disconnect',()=>{
-      let exitUser;
+      let exitUser = null;
       // 나간 방을 찾아서
       let exitRoom = roomList.find((room)=>{
         // 나간 유저를 socketid로 찾는다.
@@ -118,15 +127,37 @@ async function start() {
       });
       // 방에서 나간 유저 제거
       if(exitRoom){
-        exitRoom.userList.splice(exitRoom.userList.findIndex((user)=> user === exitUser), 1);
-        if(exitRoom.userList.length === 0){
-          roomList.splice(roomList.findIndex(room => room === exitRoom), 1);
-        } else if( exitUser.nickName === exitRoom.masterUser){
-          exitRoom.masterUser = exitRoom.userList[0].nickName;
+        let isWriter;
+        let nextWriter;
+        // 아직 게임이 시작 되지 않았을 경우
+        if(!exitRoom.isStart){
+          // 나간 유저를 해당 방에서 지우고 
+          // 남은 유저가 없을 경우 그 방을 지운다.
+          leaveRoom(roomList, exitRoom, exitUser);
+        } else {
+          // 게임이 시작됐을 경우
+          leaveRoom(roomList, exitRoom, exitUser);
+          isWriter = exitUser.nickName === exitRoom.writer.nickName;
+          if(exitRoom.userList.length < 2){
+            exitRoom.isStart = false;
+            io.to(exitRoom.roomName).emit('gameover');
+          } 
+          if(isWriter){
+            const writerIndex = exitRoom.userList.findIndex(roomUser => roomUser === exitUser);
+            nextWriter = exitRoom.writer = exitRoom.userList[(writerIndex + 1) % exitRoom.userList.length];
+            io.to(exitRoom.roomName).emit('writerChange', {writerNickName: nextWriter.nickName});
+          }
         }
         // 해당 room에 속한 사람들에게 전파
         socket.leave(exitRoom.roomName);
-        io.to(exitRoom.roomName).emit('disconnect', {room: exitRoom, exitUser});
+        let writerNickName = isWriter && nextWriter && nextWriter.nickName;
+        isWriter = isWriter || false;
+        io.to(exitRoom.roomName).emit('disconnect', {
+          room: exitRoom,
+          writerNickName,
+          exitUser,
+          isWriter
+        });
       }
     });
 

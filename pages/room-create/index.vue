@@ -62,7 +62,8 @@ export default {
           let roomObj = {
             roomName: this.roomName,
             masterUser: this.nickName,
-            userList: []
+            userList: [],
+            isStart: false
           };
           this.registRoomName(roomObj);
           this.$router.push({path: `/room-list/${this.inputRoomName}`});

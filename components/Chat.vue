@@ -42,7 +42,7 @@ export default {
     socket.emit('entrance', {nickName, roomName});
     socket.on('entrance', (data)=>{
       // 입장시 chatText로 알려줌
-      chatLog.value += `\n${data.enterUser}님이 입장하셨습니다.`;
+      chatLog.value += `\n"${data.enterUser}"님이 입장하셨습니다.`;
       // userList 갱신
       this.setRoomUserList(data.room.userList);
       this.setMasterNickName(data.room.userList[0].nickName);
@@ -52,10 +52,22 @@ export default {
       chatLog.value += msgReform(data.nickName, data.msg);
       chatLog.scrollTop=chatLog.scrollHeight;
     });
+    socket.on('answerResult', (data)=>{
+      if(data.answer){
+        chatLog.value += `\n"${data.nickName}"님이 정답을 맞췄습니다.`;
+        chatLog.value += `\n"${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
+      } else {
+        chatLog.value += `\n"${data.nickName}"님의 오답은 "${data.wrongAnswer}"입니다.`;
+      }
+      chatLog.scrollTop=chatLog.scrollHeight;      
+    });
     socket.on('disconnect', (data)=>{
       if(!this.isDestoyed){
         // 퇴장시 chatText로 알려줌
-        chatLog.value += `\n${data.exitUser.nickName}님이 퇴장하셨습니다.`;
+        chatLog.value += `\n"${data.exitUser.nickName}"님이 퇴장하셨습니다.`;
+        if(data.isWriter){
+          chatLog.value += `\n"${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
+        }
         // userList 갱신
         this.setRoomUserList(data.room.userList);
         this.setMasterNickName(data.room.userList[0].nickName);        

@@ -3,8 +3,9 @@
     <h1 class="message-header">그림판</h1>
     <div ref="canvasWrapper" class="canvas-wrapper">
       <div v-if="!isStart" class="center">
+        <input v-if="nickName === masterNickName" type="number" min="1" max="10" class="input quiz-count" v-model="quizCount" placeholder="문제수(1~10)를 입력해주세요">
         <button class="button is-large is-primary button-start" @click="onStart" >{{nickName === masterNickName ? '시작하기' : '대기중'}}</button>
-        <p class="is-danger help"> {{message}} </p>
+        <p class="is-danger help start-error-message"> {{message}} </p>
       </div>
       <div v-else class="quiz-group">
         <div v-if="nickName === writerNickName" class="quiz-window">
@@ -23,7 +24,8 @@
         <button class="yellow button" title="노랑">노랑</button>
         <button class="green button" title="초록">초록</button>
         <button class="blue button" title="파랑">파랑</button>
-        <button class="erase button" title="지우개" @click.stop="erase">
+        <button class="black button circle" title="검은 원" @click.stop="onCircle">검은 원 그리기</button>
+        <button class="erase button" title="지우개" @click.stop="onErase">
           <span class="icon is-small">
             <i class="fa fa-eraser"></i>
           </span>
@@ -40,8 +42,11 @@ export default {
   // 데이터
   data () {
     return {
-      // 현재 그림을 그리는 중 true
+      // 퀴즈 설정
       quiz: '',
+      quizInput: '',
+      quizCount: '',
+      // 현재 그림을 그리는 중 true
       isDrawing: false,
       isStart: false,
       context: null,
@@ -51,8 +56,8 @@ export default {
         color: 'black'
       },
       isErase: false,
+      isCircle: false,
       message: '',
-      quizInput: '',
     };
   },
   computed : {
@@ -75,9 +80,7 @@ export default {
     canvas.height = parseInt(canvasWrapperStyle.height, 10);
     this.context = canvas.getContext('2d');
     // 마우스 이벤트 바인딩
-    canvas.onmousemove = this.delay(this.onMouseMove, 10);
-    canvas.onmousedown = this.onMouseDown;
-    canvas.onmouseup = this.onMouseUp;
+    this.onMouseEventBind(true);
     // 창크기가 바뀔경우 최소화
     window.onresize = function (){
       canvas.width = parseInt(canvasWrapperStyle.width, 10);
@@ -85,32 +88,48 @@ export default {
     };
     socket.on('drawing', (data) => {
       // 현재 내 캔버스 사이즈에 맞게 그림
-      let w = canvas.width;
-      let h = canvas.height;
-      this.draw(data.fromX * w, data.fromY * h, data.toX * w, data.toY * h, data.color, false, data.isErase);
+      const w = canvas.width;
+      const h = canvas.height;
+      data.current.x *= w;
+      data.current.y *= h;
+      this.draw(data.current, data.toX * w, data.toY * h, false, data.isErase, data.isCircle);
     });
     socket.on('clearBoard', () => {
       this.clearBoard();
     });
     socket.on('gameStart', (data) => {
-      console.log(data);
       if(data.message){
         this.message = data.message;
         return;
       }
       this.isStart = true;
       this.setWriterNickName(this.masterNickName);
+      this.onMouseEventBind(this.nickName === this.writerNickName);
       this.quiz = data.quiz;
+      this.clearBoard(true);
     });
     socket.on('answerCheck', (data) => {
-      console.log(data);
-        if(data.answer){
-          this.setWriterNickName(data.writerNickName);
-          this.quiz = data.quiz;
-          this.quizInput = '';
-        } else {
-          console.log('틀림');
-        }
+      if(data.answer){
+        this.setWriterNickName(data.writerNickName);
+        this.quiz = data.quiz;
+        this.quizInput = '';
+        this.clearBoard(true);
+        this.onMouseEventBind(this.nickName === this.writerNickName);
+      } else {
+        this.quizInput = '';
+      }
+    });
+    socket.on('writerChange', (data)=>{
+      this.setWriterNickName(data.writerNickName);
+      this.clearBoard(true);
+      this.onMouseEventBind(this.nickName === this.writerNickName);
+    });
+    socket.on('gameover', ()=>{
+      this.onMouseEventBind(true);
+      this.setWriterNickName('');
+      this.clearBoard(true);
+      this.isStart = false;
+      this.message = '게임이 끝났습니다.';
     });
   },
   // 메소드
@@ -122,7 +141,7 @@ export default {
     onMouseUp(e){
       if(!this.isDrawing) return;
       this.isDrawing = false;
-      this.draw(this.current.x, this.current.y, e.clientX, e.clientY, this.current.color, true, this.isErase);
+      this.draw(this.current, e.clientX, e.clientY, true, this.isErase, this.isCircle);
     },
     onMouseDown(e){
       this.isDrawing = true;
@@ -131,7 +150,7 @@ export default {
     },
     onMouseMove(e){
       if(!this.isDrawing) return;
-      this.draw(this.current.x, this.current.y, e.clientX, e.clientY, this.current.color, true, this.isErase);
+      this.draw(this.current, e.clientX, e.clientY, true, this.isErase, this.isCircle);
       this.current.x = e.clientX;
       this.current.y = e.clientY;
     },
@@ -145,13 +164,13 @@ export default {
         }
       };
     },
-    draw(fromX, fromY, toX, toY, color, emmit, isErase){
-      let context = this.context;
-      let correctFromX = fromX - 16;
-      let correctFromY = fromY - 50;
-      let correctToX = toX - 16;
-      let correctToY = toY - 50;
-      if(!isErase){
+    draw({x, y, color}, toX, toY, emmit, isErase, isCircle){
+      const context = this.context;
+      const correctFromX = x - 16;
+      const correctFromY = y - 50;
+      const correctToX = toX - 16;
+      const correctToY = toY - 50;
+      if(!isErase && !isCircle){
         context.beginPath();
         // 왼쪽 패딩과 위쪽 헤더영역 보정
         context.moveTo(correctFromX, correctFromY);
@@ -160,35 +179,62 @@ export default {
         context.lineWidth = 2;
         context.stroke();
         context.closePath();
-      } else {
-        let eraseSize = 30;
-        let eraseX = correctToX - eraseSize/2;
-        let eraseY = correctToY - eraseSize/2;
+      } else if(isErase){
+        const eraseSize = 30;
+        const eraseX = correctToX - eraseSize/2;
+        const eraseY = correctToY - eraseSize/2;
         context.clearRect(eraseX, eraseY, eraseSize, eraseSize);
+      } else if(isCircle){
+        const radius = 15;
+        context.beginPath();
+        context.arc(correctToX, correctToY, radius, 0, 2 * Math.PI);
+        context.fillStyle = color;
+        context.fill();
       }
       // emmit 옵션이 없을 경우 === draw 이벤트를 받은 경우
       if(!emmit) return;
       // 각각의 클라이언트들에게 이벤트 송신
-      let roomName = this.roomName;
-      let w = canvas.width;
-      let h = canvas.height;
+      const roomName = this.roomName;
+      const w = canvas.width;
+      const h = canvas.height;
       // 각각의 클라이언트의 캔버스 사이즈에 맞게 그리기 위해 비율로 만들어 전송
       this.socket.emit('drawing', {
         roomName,
-        fromX: fromX/w,
-        fromY: fromY/h,
+        current: {
+          x: x/w,
+          y: y/h,
+          color,
+        },
         toX: toX/w,
         toY: toY/h,
-        color,
-        isErase
+        isErase,
+        isCircle
       });
     },
     selectColor(e){
       this.isErase = false;
+      this.isCircle= false;
       this.current.color=e.target.className.split(' ')[0];
     },
-    erase(){
+    onErase(){
+      this.isCircle = false;
       this.isErase = true;
+    },
+    onCircle(e){
+      this.isErase = false;
+      this.isCircle = true;
+      this.current.color=e.target.className.split(' ')[0];
+    },
+    onMouseEventBind(bool){
+      if(bool){
+        canvas.onmousemove = this.delay(this.onMouseMove, 10);
+        canvas.onmousedown = this.onMouseDown;
+        canvas.onmouseup = this.onMouseUp;
+      } else {
+        canvas.onmousemove = null;
+        canvas.onmousedown = null;
+        canvas.onmouseup = null;
+      }
     },
     clearBoard(emit){
       this.context.clearRect(0, 0, canvas.width, canvas.height);
@@ -198,13 +244,23 @@ export default {
     },
     onStart(){
       if(this.nickName !== this.masterNickName) return;
-      this.socket.emit('gameStart', {roomName : this.roomName});
+      if(this.quizCount > 10 || this.quizCount < 1) {
+        this.message = '문제 수는 1 ~ 10문제까지만 가능합니다.';
+        return;
+      }
+      this.socket.emit('gameStart', {
+        roomName : this.roomName,
+        quizCount: this.quizCount
+      });
     },
     onAnswerCheck(){
       let answer = this.quizInput;
-      console.log(answer);
       if(!answer.trim()) return;
-      this.socket.emit('answerCheck', {roomName: this.roomName, answer});
+      this.socket.emit('answerCheck', {
+        roomName: this.roomName,
+        nickName: this.nickName,
+        answer
+      });
     }
   }
 };
@@ -242,13 +298,16 @@ export default {
   height: 36px;
   margin-left: 5px;
 }
-.black{
-  margin-left: 0;
+.black.circle{
+  border-radius: 50%;
+  margin-left: 5px;
 }
+
 .erase, .all-erase {
   margin-left: 5px;
 }
 .black{
+  margin-left: 0;
   background: black;
 }
 .yellow{
@@ -283,6 +342,7 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 220px;
 }
 .quiz-window{
   border: 3px solid orange;
@@ -300,5 +360,11 @@ export default {
 }
 .quiz-answer{
   width: 250px;
+}
+.input.quiz-count {
+  margin-bottom: 10px;
+}
+.start-error-message{
+  text-align: center;
 }
 </style>

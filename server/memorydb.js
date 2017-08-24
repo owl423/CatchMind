@@ -1,5 +1,19 @@
+// user 구조
+// user {
+//   nickName: 'string',
+//   socketID: 'string'
+// }
 export const userList = [];
 
+// room 구조
+// room {
+  // roomName : 'string',
+  // masterUser : 'string',
+  // writerNickName : 'string',  // 현재 그림을 그리고 있는 
+  // userList : 'userList', // 현재 방에 입장되어 유저 목록
+  // isStart : 'boolean', // 현재 방이 게임이 시작한 방인지 아닌지 알수 있는 플래그
+  // quizList : 'quizList' //중복 문제 없게 하기 위해 해당 방에서 출제 되었던 문제 목록 유지
+// }
 export const roomList = [];
 
 export const quizList = [

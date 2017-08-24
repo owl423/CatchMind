@@ -12,7 +12,10 @@
           <h2 class="quiz-title">문제</h2>
           <p class="quiz-content">{{quiz}}</p>
         </div>
-        <input v-else type="text" class="input quiz-answer" v-model="quizInput" placeholder="정답을 입력하고 Enter를 누르세요" @keydown.enter="onAnswerCheck">
+        <div v-else class="quiz-answer-wrapper">
+          <label for="quiz-input">정답 입력</label>
+          <input type="text" class="input quiz-answer" id="quiz-input" v-model="quizInput" placeholder="정답을 입력하고 Enter를 누르세요" @keydown.enter="onAnswerCheck">
+        </div>
       </div>
       <canvas 
       id="canvas" 
@@ -32,6 +35,7 @@
         </button>
         <button class="all-erase button" @click.stop="clearBoard(true)">전체 지우기</button>
       </div>
+      <button class="button is-danger exit-btn" @click="exitRoom">게임 나가기</button>
     </div>
   </div>
 </template>
@@ -131,12 +135,18 @@ export default {
       this.isStart = false;
       this.message = '게임이 끝났습니다.';
     });
+    socket.on('playingEntrance', (data)=>{
+      this.setWriterNickName(data.writerNickName);
+      this.isStart = data.isStart;
+      this.onMouseEventBind();
+    });
   },
   // 메소드
   methods: {
     ...mapMutations([
       'setSocket',
-      'setWriterNickName'
+      'setWriterNickName',
+      'setMasterNickName'
     ]),
     onMouseUp(e){
       if(!this.isDrawing) return;
@@ -239,6 +249,7 @@ export default {
     clearBoard(emit){
       this.context.clearRect(0, 0, canvas.width, canvas.height);
       if(!emit) return ;
+      if(this.nickName !== this.writerNickName) return;
       let roomName = this.roomName;
       this.socket.emit('clearBoard', {roomName});
     },
@@ -261,6 +272,12 @@ export default {
         nickName: this.nickName,
         answer
       });
+    },
+    exitRoom(){
+      let message = '정말 방을 나가시겠습니까?';
+      let result = confirm(message);
+      if(!result) return;
+      this.$router.push({path: '/room-list'});
     }
   }
 };
@@ -344,11 +361,12 @@ export default {
   transform: translate(-50%, -50%);
   width: 220px;
 }
-.quiz-window{
+.quiz-window, .quiz-answer-wrapper{
   border: 3px solid orange;
   border-radius: 10px;
   display: flex;
   font-size: 18px;
+  
 }
 .quiz-title{
   background: orange;
@@ -360,11 +378,27 @@ export default {
 }
 .quiz-answer{
   width: 250px;
+  border-radius: 10px;
 }
 .input.quiz-count {
   margin-bottom: 10px;
 }
 .start-error-message{
   text-align: center;
+}
+.exit-btn{
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+}
+[for="quiz-input"]{
+  height: 36px;
+  display: inline-block;
+  line-height: 36px;
+  color: #fff;
+  margin: 0 10px;
+}
+.quiz-answer-wrapper{
+  background-color: orange;
 }
 </style>

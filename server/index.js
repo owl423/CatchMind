@@ -6,14 +6,14 @@ import api from './api';
 import bodyParser from 'body-parser';
 import {quizList, roomList} from './memorydb';
 import {random, findRoom, leaveRoom} from './util';
-import multer from 'multer';
+// import multer from 'multer';
 const app = express();
 const host = process.env.HOST || '0.0.0.0';
 const port = process.env.PORT || 3000;
 
 let server = http.Server(app);
 let io = socket(server);
-let upload = multer({dest: './upload'});
+// let upload = multer({dest: './upload'});
 app.set('port', port);
 
 // Import API Routes
@@ -44,10 +44,18 @@ async function start() {
       if(room){
         room.userList.push({
           nickName: data.nickName,
-          socketID: socket.id
+          socketID: socket.id,
         });
         // 해당 룸 사람들에게 새로 입장한 사람의 정보 알려줌
-        io.to(data.roomName).emit('entrance', {room, enterUser: data.nickName});
+        io.to(data.roomName).emit('entrance', {
+          room, 
+          enterUser: data.nickName
+        });
+        if(!room.isStart)return;
+        io.to(data.roomName).emit('playingEntrance', {
+          writerNickName: room.writerNickName,
+          isStart: room.isStart
+        });
       }
     });
     // 채팅 메시지
@@ -72,7 +80,7 @@ async function start() {
       const quiz = quizList[random(quizList.length)];
       room.isStart = true;
       room.quizList = [quiz];
-      room.writer = room.userList[0];
+      room.writerNickName = room.userList[0].nickName;
       room.remainQuizCount = data.quizCount;
       io.to(data.roomName).emit('gameStart', {quiz});
     });
@@ -89,8 +97,8 @@ async function start() {
           room.isStart = false;
           io.to(data.roomName).emit('gameover');
         } else {
-          const writerIndex = room.userList.findIndex(roomUser => roomUser === room.writer);
-          const nextWriter = room.writer = room.userList[(writerIndex + 1) % room.userList.length];
+          const writerIndex = room.userList.findIndex(roomUser => roomUser.nickName === room.writerNickName);
+          const nextWriterNickName = room.writerNickName = room.userList[(writerIndex + 1) % room.userList.length].nickName;
           let quiz;
           // 퀴즈 리스트에 기존에 출제 됐던 문제가 있는 지 확인해서 없는 문제로 생성
           do{
@@ -98,10 +106,12 @@ async function start() {
           }
           while(roomQuizList.findIndex(roomQuiz => roomQuiz === quiz) !== -1);
           roomQuizList.push(quiz);
+          console.log('nextWriterNickName: ', nextWriterNickName);
           sendData = {
             answer: true,
             nickName: data.nickName,
-            writerNickName : nextWriter.nickName,
+            writerNickName : nextWriterNickName,
+            quizAnswer: data.answer,
             quiz
           };
         }
@@ -111,7 +121,7 @@ async function start() {
         sendData = {
           answer : false,
           nickName: data.nickName,
-          wrongAnswer: data.answer
+          wrongAnswer: data.answer,
         };
       }
       io.to(data.roomName).emit('answerCheck', sendData);
@@ -137,7 +147,7 @@ async function start() {
         } else {
           // 게임이 시작됐을 경우
           leaveRoom(roomList, exitRoom, exitUser);
-          isWriter = exitUser.nickName === exitRoom.writer.nickName;
+          isWriter = exitUser.nickName === exitRoom.writerNickName;
           if(exitRoom.userList.length < 2){
             exitRoom.isStart = false;
             io.to(exitRoom.roomName).emit('gameover');

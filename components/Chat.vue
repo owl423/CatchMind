@@ -54,7 +54,7 @@ export default {
     });
     socket.on('answerResult', (data)=>{
       if(data.answer){
-        chatLog.value += `\n"${data.nickName}"님이 ${data.quizAnswer}을 맞췄습니다.`;
+        chatLog.value += `\n"${data.nickName}"님이 "${data.quizAnswer}"을(를) 맞췄습니다.`;
         chatLog.value += `\n"${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
       } else {
         chatLog.value += `\n"${data.nickName}"님의 오답은 "${data.wrongAnswer}"입니다.`;

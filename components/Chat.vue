@@ -54,7 +54,7 @@ export default {
     });
     socket.on('answerResult', (data)=>{
       if(data.answer){
-        chatLog.value += `\n"${data.nickName}"님이 정답을 맞췄습니다.`;
+        chatLog.value += `\n"${data.nickName}"님이 ${data.quizAnswer}을 맞췄습니다.`;
         chatLog.value += `\n"${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
       } else {
         chatLog.value += `\n"${data.nickName}"님의 오답은 "${data.wrongAnswer}"입니다.`;
@@ -77,6 +77,10 @@ export default {
   },
   destroyed(){
     this.isDestoyed = true;
+    this.setMasterNickName('');
+    this.setRoomUserList('');
+    this.setWriterNickName('');
+    this.setRoomName('');
     this.socket.disconnect();
     this.setSocket(null);
   },
@@ -85,7 +89,9 @@ export default {
     ...mapMutations([
       'setRoomUserList',
       'setMasterNickName',
-      'setSocket'
+      'setWriterNickName',
+      'setSocket',
+      'setRoomName'
     ]),
     msgUpdate(e){
       this.msg = e.target.value;

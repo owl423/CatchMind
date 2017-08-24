@@ -32,11 +32,14 @@ export default {
     background: darkred;
     color: white;
     border-radius: 5px;
+    padding: 0 5px;
+    margin-right: 5px;
   }
   .room-master-mark{
     background: darksalmon;
     color: white;
     border-radius: 5px;
+    padding: 0 5px;
   }
 </style>
 

@@ -138,7 +138,7 @@ export default {
     socket.on('playingEntrance', (data)=>{
       this.setWriterNickName(data.writerNickName);
       this.isStart = data.isStart;
-      this.onMouseEventBind();
+      this.onMouseEventBind(this.writerNickName === this.nickName);
     });
   },
   // 메소드

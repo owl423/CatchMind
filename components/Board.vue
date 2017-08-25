@@ -36,6 +36,18 @@
         <button class="all-erase button" @click.stop="clearBoard(true)">전체 지우기</button>
       </div>
       <button class="button is-danger exit-btn" @click="exitRoom">게임 나가기</button>
+      <p class="time">
+        <span class="remain-title">남은 시간 : </span>
+        <span class="remain-time">{{time}}</span>
+        <div v-if="writerNickName === nickName">
+          <button class="button is-small":disabled="numTime > 120" @click="passTurn">턴 넘기기</button>
+          <span class="desc">
+            {{ numTime > 120 
+            ? '시작 후 60초가 지나면 턴 넘기기 버튼이 활성화 됩니다.' 
+            : '남은 시간이 0이 되면 턴이 자동으로 넘어갑니다.' }}
+          </span>
+        </div>
+      </p>
     </div>
   </div>
 </template>
@@ -62,6 +74,7 @@ export default {
       isErase: false,
       isCircle: false,
       message: '',
+      numTime: 180
     };
   },
   computed : {
@@ -71,7 +84,13 @@ export default {
       'nickName',
       'writerNickName',
       'masterNickName'
-    ])
+    ]),
+    time(){ 
+      let m = Math.floor(this.numTime / 60);
+      let s = this.numTime % 60;
+      s = s < 10 ? '0'+s : s;
+      return `${m} : ${s}`;
+    }
   },
   // 라이프사이클 훅
   mounted(){
@@ -126,6 +145,7 @@ export default {
     socket.on('writerChange', (data)=>{
       this.setWriterNickName(data.writerNickName);
       this.clearBoard(true);
+      this.quiz = data.quiz;
       this.onMouseEventBind(this.nickName === this.writerNickName);
     });
     socket.on('gameover', ()=>{
@@ -138,7 +158,11 @@ export default {
     socket.on('playingEntrance', (data)=>{
       this.setWriterNickName(data.writerNickName);
       this.isStart = data.isStart;
+      this.time = data.time;
       this.onMouseEventBind(this.writerNickName === this.nickName);
+    });
+    socket.on('time', (data)=>{
+      this.numTime = data.time;
     });
   },
   // 메소드
@@ -278,6 +302,10 @@ export default {
       let result = confirm(message);
       if(!result) return;
       this.$router.push({path: '/room-list'});
+    },
+    passTurn(){
+      if(this.nickName !== this.writerNickName) return;
+      this.socket.emit('passTurn', {roomName: this.roomName});
     }
   }
 };
@@ -400,5 +428,14 @@ export default {
 }
 .quiz-answer-wrapper{
   background-color: orange;
+}
+.time {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.desc {
+  display: block;
 }
 </style>

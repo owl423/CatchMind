@@ -64,7 +64,7 @@ export default {
     socket.on('disconnect', (data)=>{
       if(!this.isDestoyed){
         // 퇴장시 chatText로 알려줌
-        chatLog.value += `\n"${data.exitUser.nickName}"님이 퇴장하셨습니다.`;
+        chatLog.value += `\n"${data.exitUserNickName}"님이 퇴장하셨습니다.`;
         if(data.isWriter){
           chatLog.value += `\n"${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
         }

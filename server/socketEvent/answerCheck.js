@@ -1,10 +1,11 @@
-import {findRoom, randomQuiz, getNextWriterNickName} from '../util';
+import {findRoom, randomQuiz, getNextWriterNickName, setIntervalCallback} from '../util';
 
 // 정답입력 확인 이벤트
 export default function answerCheck(io, socket, roomList, quizList){
   socket.on('answerCheck', (data)=>{
     const room = findRoom(roomList, data.roomName);
     const roomQuizList = room.quizList;
+    console.log('room.quizList: ', room.quizList);
     const answerCheck = data.answer === roomQuizList[roomQuizList.length-1];
     let sendData;
     if(answerCheck){
@@ -26,7 +27,9 @@ export default function answerCheck(io, socket, roomList, quizList){
           quizAnswer: data.answer,
           quiz
         };
+        clearInterval(room.setIntervalID);
         room.time = 180;
+        room.setIntervalID = setInterval(setIntervalCallback.bind(null, io, room, quizList), 1000);
       }
     } else {
       // 정답이 아닌경우

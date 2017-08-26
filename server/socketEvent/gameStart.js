@@ -1,4 +1,4 @@
-import {random, findRoom, generateIntarval} from '../util';
+import {random, findRoom, setIntervalCallback} from '../util';
 
 // 게임 시작 이벤트
 export default function gameStart(io, socket, roomList, quizList){
@@ -11,7 +11,8 @@ export default function gameStart(io, socket, roomList, quizList){
     const quiz = quizList[random(quizList.length)];
     room.isStart = true;
     room.quizList = [quiz];
-    generateIntarval(io, room, quizList);
+    room.time = 180;
+    room.setIntervalID = setInterval(setIntervalCallback.bind(null, io, room, quizList), 1000);
     room.writerNickName = room.userList[0].nickName;
     room.remainQuizCount = data.quizCount;
     io.to(data.roomName).emit('gameStart', {quiz});

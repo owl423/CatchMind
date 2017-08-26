@@ -47,6 +47,7 @@ export default {
     // 방 리스트 전체를 가져온다.
     async getRoomList({commit}){
       let {data} = await axios.get('/api/roomList');
+      console.log('data: ', data);
       commit('setRoomList', data);
       return data;
     },

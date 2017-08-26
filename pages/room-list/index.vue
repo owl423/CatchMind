@@ -8,7 +8,7 @@
       </h1>
       <div class="room-list box">
         <ul v-if="roomList.length !== 0">
-          <li v-for="(room, index) in roomList" :key="room">
+          <li v-for="room in roomList" :key="room">
             <a :href="`/${room.roomName}`" :title="`${room.roomName}으로 입장`" class="box" @click.prevent.stop="enterRoom(room.roomName)">
             방제 : {{room.roomName}} 방장 : {{room.masterUser}} 입장인원: {{room.userList.length}}
             <a :href="`/${room.roomName}`" class="button is-small" @click.prevent="enterRoom(room.roomName)">입장</a>
@@ -37,7 +37,7 @@ export default {
     ])
   },
   // 라이프사이클
-  created(){
+  mounted(){
     this.getRoomList();
   },
   // 라우팅
@@ -80,5 +80,8 @@ export default {
 .room-list{
   max-height: 60vh;
   overflow: scroll;
+}
+.box{
+  overflow: hidden;
 }
 </style>

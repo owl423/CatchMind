@@ -10,16 +10,17 @@ export default function entrance(io, socket, roomList){
         nickName: data.nickName,
         socketID: socket.id,
       });
+      if(room.isStart){
+        io.to(room.roomName).emit('playingEntrance', {
+          writerNickName: room.writerNickName,
+          isStart: room.isStart,
+          time: room.time
+        });
+      }
       // 해당 룸 사람들에게 새로 입장한 사람의 정보 알려줌
-      io.to(data.roomName).emit('entrance', {
-        room, 
-        enterUser: data.nickName
-      });
-      if(!room.isStart)return;
-      io.to(data.roomName).emit('playingEntrance', {
-        writerNickName: room.writerNickName,
-        isStart: room.isStart,
-        time: room.time
+      io.to(room.roomName).emit('entrance', {
+        userList: room.userList, 
+        enterUser: room.userList[room.userList.length-1].nickName
       });
     }
   });

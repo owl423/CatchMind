@@ -25,18 +25,16 @@ export const getNextWriterNickName = (room) => {
   return nextWriterNickName;
 };
 
-export const generateIntarval = (io, room, quizList) => {
-  room.time = 180;
-  room.setIntervalID = setInterval(()=>{
+export const setIntervalCallback = (io, room, quizList) => {
     room.time--;
     if(room.time < 0){
-      room.setIntervalID = generateIntarval(io, room, quizList, answer);
+      clearInterval(room.setIntervalID);
+      room.time = 180;
+      room.setIntervalID = setInterval(setIntervalCallback.bind(null, io, room, quizList), 1000);
       let writerNickName = getNextWriterNickName(room);
       let newQuiz = randomQuiz(quizList, room.quizList);
       io.to(room.roomName).emit('writerChange', {writerNickName, quiz: newQuiz});
-      room.time = 180;
       return;
     }
     io.to(room.roomName).emit('time', {time: room.time});
-  }, 1000);
 };

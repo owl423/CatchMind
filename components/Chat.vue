@@ -44,8 +44,8 @@ export default {
       // 입장시 chatText로 알려줌
       chatLog.value += `\n"${data.enterUser}"님이 입장하셨습니다.`;
       // userList 갱신
-      this.setRoomUserList(data.room.userList);
-      this.setMasterNickName(data.room.userList[0].nickName);
+      this.setRoomUserList(data.userList);
+      this.setMasterNickName(data.userList[0].nickName);
       chatLog.scrollTop=chatLog.scrollHeight;
     });
     socket.on('resMsg', (data)=>{
@@ -69,8 +69,9 @@ export default {
           chatLog.value += `\n"${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
         }
         // userList 갱신
-        this.setRoomUserList(data.room.userList);
-        this.setMasterNickName(data.room.userList[0].nickName);        
+        console.log('data: ', data);
+        this.setRoomUserList(data.userList);
+        this.setMasterNickName(data.userList[0].nickName);
         chatLog.scrollTop=chatLog.scrollHeight;
       }
     });

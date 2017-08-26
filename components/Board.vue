@@ -40,7 +40,7 @@
         <span class="remain-title">남은 시간 : </span>
         <span class="remain-time">{{time}}</span>
         <div v-if="writerNickName === nickName">
-          <button class="button is-small":disabled="numTime > 120" @click="passTurn">턴 넘기기</button>
+          <button class="button is-small":disabled="numTime > 180" @click="passTurn">턴 넘기기</button>
           <span class="desc">
             {{ numTime > 120 
             ? '시작 후 60초가 지나면 턴 넘기기 버튼이 활성화 됩니다.' 
@@ -158,7 +158,7 @@ export default {
     socket.on('playingEntrance', (data)=>{
       this.setWriterNickName(data.writerNickName);
       this.isStart = data.isStart;
-      this.time = data.time;
+      this.numtime = data.time;
       this.onMouseEventBind(this.writerNickName === this.nickName);
     });
     socket.on('time', (data)=>{

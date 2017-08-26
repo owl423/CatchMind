@@ -1,6 +1,6 @@
 <template>
   <div class="board-wrapper message">
-    <h1 class="message-header">그림판</h1>
+    <h1 class="message-header">그림판(방제 : {{roomName}})</h1>
     <div ref="canvasWrapper" class="canvas-wrapper">
       <div v-if="!isStart" class="center">
         <input v-if="nickName === masterNickName" type="number" min="1" max="10" class="input quiz-count" v-model="quizCount" placeholder="문제수(1~10)를 입력해주세요">

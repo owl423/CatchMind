@@ -3,15 +3,17 @@
     <div class="main is-centered">
       <h1 class="title is-1 main-title room-list-title">방목록 
         <span class="icon is-large button" @click="getRoomList">
-          <i class="fa fa-refresh" aria-hidden></i>
+          <i class="fa fa-refresh" aria-hidden="true"></i>
         </span>
       </h1>
       <div class="room-list box">
         <ul v-if="roomList.length !== 0">
           <li v-for="room in roomList" :key="room">
             <a :href="`/${room.roomName}`" :title="`${room.roomName}으로 입장`" class="box" @click.prevent.stop="enterRoom(room.roomName)">
-            방제 : {{room.roomName}} 방장 : {{room.masterUser}} 입장인원: {{room.userList.length}}
-            <a :href="`/${room.roomName}`" class="button is-small" @click.prevent="enterRoom(room.roomName)">입장</a>
+              <span class="room-title">방제 : {{room.roomName}}</span>
+              <span class="room-master">방장 : {{room.masterUser}}</span> 
+              <span class="room-user-count">현재 인원: {{room.userList.length}}</span>
+              <a :href="`/${room.roomName}`" class="button is-small room-enter-btn" @click.prevent="enterRoom(room.roomName)">입장</a>
             </a>
           </li>
         </ul>
@@ -79,9 +81,24 @@ export default {
 
 .room-list{
   max-height: 60vh;
-  overflow: scroll;
+  overflow: hidden;
 }
 .box{
   overflow: hidden;
+}
+.room-title, .room-master, .room-user-count {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.room-title {
+  width: 50%;
+}
+.room-master{
+  width: 25%;
+}
+.room-enter-btn{
+  float: right;
 }
 </style>

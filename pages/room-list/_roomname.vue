@@ -7,7 +7,7 @@
       <chat></chat>
     </div>
   </div>
-  <p v-else>방 생성에 실패 했습니다. 다시 시도해 주세요</p>
+  <p class="box center" v-else>방 생성에 실패 했습니다. 다시 시도해 주세요</p>
 </div>
 </template>
 
@@ -80,7 +80,7 @@ html{
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  overflow: scroll
+  overflow: hidden;
 }
 .user-list-wrapper {
   flex-basis: 20%;
@@ -88,7 +88,7 @@ html{
   padding-bottom: 1em;
 }
 .user-list{
-  overflow: scroll;
+  overflow: hidden;
 }
 .chat-wrapper{
   flex-basis: 80%;

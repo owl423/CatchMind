@@ -36,18 +36,20 @@
         <button class="all-erase button" @click.stop="clearBoard(true)">전체 지우기</button>
       </div>
       <button class="button is-danger exit-btn" @click="exitRoom">게임 나가기</button>
-      <p class="time">
-        <span class="remain-title">남은 시간 : </span>
-        <span class="remain-time">{{time}}</span>
+      <div class="time">
+        <div class="remain-wrapper">
+          <span class="remain-title"><i class="fa fa-clock-o" aria-hidden="true"></i></span>
+          <span :class="['remain-time', numTime < 60 ? 'is-danger': '']">{{time}}</span>
+        </div>
         <div v-if="writerNickName === nickName">
-          <button class="button is-small":disabled="numTime > 180" @click="passTurn">턴 넘기기</button>
           <span class="desc">
             {{ numTime > 120 
             ? '시작 후 60초가 지나면 턴 넘기기 버튼이 활성화 됩니다.' 
             : '남은 시간이 0이 되면 턴이 자동으로 넘어갑니다.' }}
           </span>
         </div>
-      </p>
+      </div>
+      <button class="button is-normal pass-btn is-light" v-if="writerNickName === nickName" :disabled="numTime > 120" @click="passTurn">턴 넘기기</button>
     </div>
   </div>
 </template>
@@ -437,5 +439,31 @@ export default {
 }
 .desc {
   display: block;
+  font-size: 14px;
+  line-height: 1;
 }
+.remain-title, .remain-time{
+  display: inline-block;
+}
+.remain-title {
+  width: 30px;
+}
+.remain-time {
+  width: 80px;
+}
+.pass-btn {
+  position: absolute;
+  right: 5px;
+  top: 53px;
+}
+.remain-wrapper{
+  margin: 0 auto;
+  width: 110px;
+}
+.remain-title i, .remain-time {
+  font-size: 30px;
+  line-height: 1;
+  vertical-align: middle
+}
+
 </style>

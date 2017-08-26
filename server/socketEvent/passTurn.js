@@ -2,6 +2,7 @@ import {randomQuiz, getNextWriterNickName, findRoom, setIntervalCallback} from '
 export default function passTurn(io, socket, roomList, quizList){
   socket.on('passTurn', (data)=>{
     const room = findRoom(roomList, data.roomName);
+    const prevWriterNickName = room.writerNickName;
     const writerNickName = getNextWriterNickName(room);
     const quiz = randomQuiz(quizList, room.quizList);
     room.quizList.push(quiz);
@@ -9,6 +10,7 @@ export default function passTurn(io, socket, roomList, quizList){
     clearInterval(room.setIntervalID);
     room.time = 180;
     io.to(data.roomName).emit('writerChange', {writerNickName, quiz});
+    io.to(data.roomName).emit('passTurn', {prevWriterNickName, writerNickName});
     room.setIntervalID = setInterval(setIntervalCallback.bind(null, io, room, quizList), 1000);
   });
 }

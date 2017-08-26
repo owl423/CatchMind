@@ -24,6 +24,7 @@ export default function disconnect(io, socket, roomList, quizList){
         isWriter = exitUser.nickName === room.writerNickName;
         if(room.userList.length < 2){
           room.isStart = false;
+          clearInterval(room.setIntervalID);
           io.to(room.roomName).emit('gameover');
         } 
         if(isWriter && room.userList.length > 1){
@@ -40,7 +41,6 @@ export default function disconnect(io, socket, roomList, quizList){
       }
       // 해당 room에 속한 사람들에게 전파
       socket.leave(room.roomName);
-      writerNickName = isWriter && writerNickName;
       io.to(room.roomName).emit('disconnect', {
         userList: room.userList,
         writerNickName,

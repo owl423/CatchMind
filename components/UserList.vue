@@ -1,6 +1,6 @@
 <template>
   <div class="user-list-wrapper">
-    <h2 class="message-header"> 사용자 목록</h2>
+    <h2 class="message-header">사용자 목록({{roomUserList.length}}명)</h2>
     <ul class="box user-list message-body">
       <li 
         v-for="user in roomUserList"

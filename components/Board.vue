@@ -41,7 +41,7 @@
           <span class="remain-title"><i class="fa fa-clock-o" aria-hidden="true"></i></span>
           <span :class="['remain-time', numTime < 60 ? 'is-danger': '']">{{time}}</span>
         </div>
-        <div v-if="writerNickName === nickName">
+        <div>
           <span class="desc">
             {{ numTime > 120 
             ? '시작 후 60초가 지나면 턴 넘기기 버튼이 활성화 됩니다.' 

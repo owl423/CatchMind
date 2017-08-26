@@ -31,8 +31,11 @@ export const setIntervalCallback = (io, room, quizList) => {
       clearInterval(room.setIntervalID);
       room.time = 180;
       room.setIntervalID = setInterval(setIntervalCallback.bind(null, io, room, quizList), 1000);
-      let writerNickName = getNextWriterNickName(room);
-      let newQuiz = randomQuiz(quizList, room.quizList);
+      const prevWirterNickName = room.writerNickName;
+      const writerNickName = getNextWriterNickName(room);
+      const newQuiz = randomQuiz(quizList, room.quizList);
+      room.quizList.push(newQuiz);
+      io.to(room.roomName).emit('passTurn', {prevWirterNickName, writerNickName, timeOut: true});
       io.to(room.roomName).emit('writerChange', {writerNickName, quiz: newQuiz});
       return;
     }

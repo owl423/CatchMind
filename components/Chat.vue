@@ -62,6 +62,9 @@ export default {
       chatLog.scrollTop=chatLog.scrollHeight;
     });
     socket.on('passTurn', (data)=>{
+      if(data.timeOut){
+        chatLog.value += `\nSystem : "${data.prevWriterNickName}"님의 시간이 초과되었습니다.`;
+      }
       chatLog.value += `\nSystem : "${data.prevWriterNickName}"님이 턴을 넘겼습니다.`;
       chatLog.value += `\nSystem : "${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
       chatLog.scrollTop=chatLog.scrollHeight;

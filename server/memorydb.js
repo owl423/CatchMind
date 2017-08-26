@@ -12,7 +12,10 @@ export const userList = [];
   // writerNickName : 'string',  // 현재 그림을 그리고 있는 
   // userList : 'userList', // 현재 방에 입장되어 유저 목록
   // isStart : 'boolean', // 현재 방이 게임이 시작한 방인지 아닌지 알수 있는 플래그
-  // quizList : 'quizList' //중복 문제 없게 하기 위해 해당 방에서 출제 되었던 문제 목록 유지
+  // quizList : 'quizList' // 중복 문제 없게 하기 위해 해당 방에서 출제 되었던 문제 목록 유지
+  // time : 'number' // 현재 방에 게임이 시작했을 경우 초기 값 180(s)
+  // setIntervalID : 'string' // 게임이 종료 됐을 때 멈추기 위한 ID 값
+  // remainQuizCount : 'number' // 설정된 문제 값
 // }
 export const roomList = [];
 

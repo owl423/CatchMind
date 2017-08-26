@@ -29,14 +29,14 @@ export default {
 
 <style>
   .writer-mark{
-    background: darkred;
+    background: orange;
     color: white;
     border-radius: 5px;
     padding: 0 5px;
     margin-right: 5px;
   }
   .room-master-mark{
-    background: darksalmon;
+    background: olive;
     color: white;
     border-radius: 5px;
     padding: 0 5px;

@@ -42,10 +42,10 @@ export default {
     socket.emit('entrance', {nickName, roomName});
     socket.on('entrance', (data)=>{
       // 입장시 chatText로 알려줌
-      chatLog.value += `\n"${data.enterUser}"님이 입장하셨습니다.`;
+      chatLog.value += `\nSystem : "${data.enterUser}"님이 입장하셨습니다.`;
       // userList 갱신
-      this.setRoomUserList(data.room.userList);
-      this.setMasterNickName(data.room.userList[0].nickName);
+      this.setRoomUserList(data.userList);
+      this.setMasterNickName(data.userList[0].nickName);
       chatLog.scrollTop=chatLog.scrollHeight;
     });
     socket.on('resMsg', (data)=>{
@@ -54,23 +54,31 @@ export default {
     });
     socket.on('answerResult', (data)=>{
       if(data.answer){
-        chatLog.value += `\n"${data.nickName}"님이 "${data.quizAnswer}"을(를) 맞췄습니다.`;
-        chatLog.value += `\n"${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
+        chatLog.value += `\nSystem : "${data.nickName}"님이 "${data.quizAnswer}"을(를) 맞췄습니다.`;
+        chatLog.value += `\nSystem : "${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
       } else {
-        chatLog.value += `\n"${data.nickName}"님의 오답은 "${data.wrongAnswer}"입니다.`;
+        chatLog.value += `\nSystem : "${data.nickName}"님의 오답은 "${data.wrongAnswer}"입니다.`;
       }
-      chatLog.scrollTop=chatLog.scrollHeight;      
+      chatLog.scrollTop=chatLog.scrollHeight;
+    });
+    socket.on('passTurn', (data)=>{
+      chatLog.value += `\nSystem : "${data.prevWriterNickName}"님이 턴을 넘겼습니다.`;
+      chatLog.value += `\nSystem : "${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
+      chatLog.scrollTop=chatLog.scrollHeight;
     });
     socket.on('disconnect', (data)=>{
       if(!this.isDestoyed){
         // 퇴장시 chatText로 알려줌
-        chatLog.value += `\n"${data.exitUser.nickName}"님이 퇴장하셨습니다.`;
-        if(data.isWriter){
-          chatLog.value += `\n"${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
+        chatLog.value += `\nSystem : "${data.exitUserNickName}"님이 퇴장하셨습니다.`;
+        if(data.isWriter && data.writerNickName !== undefined){
+          chatLog.value += `\nSystem : "${data.writerNickName}"님으로 출제자가 변경되었습니다.`;
+        }
+        if(data.isWriter && data.writerNickName === undefined){
+          chatLog.value += `\nSystem : 인원 부족으로 게임이 끝났습니다.`;
         }
         // userList 갱신
-        this.setRoomUserList(data.room.userList);
-        this.setMasterNickName(data.room.userList[0].nickName);        
+        this.setRoomUserList(data.userList);
+        this.setMasterNickName(data.userList[0].nickName);
         chatLog.scrollTop=chatLog.scrollHeight;
       }
     });

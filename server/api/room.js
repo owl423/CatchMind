@@ -20,7 +20,8 @@ router.get('/roomList', function(req, res){
   }
   else {
     // query가 없는 경우 roomList 전체 반환
-    res.json(roomList);
+    let newRoomList = roomList.map(({roomName, userList, masterUser})=>{return {roomName, userList, masterUser}; });
+    res.json(newRoomList);
   }
 });
 router.post('/roomList',function(req, res){

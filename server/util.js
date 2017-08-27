@@ -27,15 +27,15 @@ export const getNextWriterNickName = (room) => {
 
 export const setIntervalCallback = (io, room, quizList) => {
     room.time--;
-    if(room.time < 0){
+    if(room.time < 1){
       clearInterval(room.setIntervalID);
       room.time = 180;
       room.setIntervalID = setInterval(setIntervalCallback.bind(null, io, room, quizList), 1000);
-      const prevWirterNickName = room.writerNickName;
+      const prevWriterNickName = room.writerNickName;
       const writerNickName = getNextWriterNickName(room);
       const newQuiz = randomQuiz(quizList, room.quizList);
       room.quizList.push(newQuiz);
-      io.to(room.roomName).emit('passTurn', {prevWirterNickName, writerNickName, timeOut: true});
+      io.to(room.roomName).emit('passTurn', {prevWriterNickName, writerNickName, timeOut: true});
       io.to(room.roomName).emit('writerChange', {writerNickName, quiz: newQuiz});
       return;
     }

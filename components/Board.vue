@@ -7,49 +7,55 @@
         <button class="button is-large is-primary button-start" @click="onStart" >{{nickName === masterNickName ? '시작하기' : '대기중'}}</button>
         <p class="is-danger help start-error-message"> {{message}} </p>
       </div>
-      <div v-else class="quiz-group">
-        <div v-if="nickName === writerNickName" class="quiz-window">
-          <h2 class="quiz-title">문제</h2>
-          <p class="quiz-content">{{quiz}}</p>
-        </div>
-        <div v-else class="quiz-answer-wrapper">
-          <label for="quiz-input">정답 입력</label>
-          <input type="text" class="input quiz-answer" id="quiz-input" v-model="quizInput" placeholder="정답을 입력하고 Enter를 누르세요" @keydown.enter="onAnswerCheck">
-        </div>
-      </div>
       <canvas 
       id="canvas" 
       class="box message-body canvas"
       ></canvas>
-      <div class="tool-bar" @click="selectColor($event)">
-        <button class="black button" title="검정">검정</button>
-        <button class="red button" title="빨강">빨강</button>
-        <button class="yellow button" title="노랑">노랑</button>
-        <button class="green button" title="초록">초록</button>
-        <button class="blue button" title="파랑">파랑</button>
-        <button class="black button circle" title="검은 원" @click.stop="onCircle">검은 원 그리기</button>
-        <button class="erase button" title="지우개" @click.stop="onErase">
-          <span class="icon is-small">
-            <i class="fa fa-eraser"></i>
-          </span>
-        </button>
-        <button class="all-erase button" @click.stop="clearBoard(true)">전체 지우기</button>
+      
+      <div class="menu">
+        <div class="tool-bar" @click="selectColor($event)">
+          <button class="black button" title="검정">검정</button>
+          <button class="red button" title="빨강">빨강</button>
+          <button class="yellow button" title="노랑">노랑</button>
+          <button class="green button" title="초록">초록</button>
+          <button class="blue button" title="파랑">파랑</button>
+          <button class="black button circle" title="검은 원" @click.stop="onCircle">검은 원 그리기</button>
+          <button class="erase button" title="지우개" @click.stop="onErase">
+            <span class="icon is-small">
+              <i class="fa fa-eraser"></i>
+            </span>
+          </button>
+          <button class="all-erase button" @click.stop="clearBoard(true)">모두 지우기</button>
+        </div>
+        <div class="time">
+          <div class="remain-wrapper">
+            <span class="remain-title"><i class="fa fa-clock-o" aria-hidden="true"></i></span>
+            <span :class="['remain-time', numTime < 60 ? 'is-danger': '']">{{time}}</span>
+          </div>
+          <div>
+            <span class="desc">
+              {{ numTime > 120 
+              ? '시작 후 60초가 지나면 턴 넘기기 버튼이 활성화 됩니다.' 
+              : '남은 시간이 0이 되면 턴이 자동으로 넘어갑니다.' }}
+            </span>
+          </div>
+        </div>
+        <div v-if="isStart" class="quiz-group">
+          <div v-if="nickName === writerNickName" class="quiz-window-wrapper">
+            <button class="button pass-btn is-warning" :disabled="numTime > 120" @click="passTurn">턴 넘기기</button>
+            <div class="quiz-window">
+              <h2 class="quiz-title">문제</h2>
+              <p class="quiz-content">{{quiz}}</p>
+            </div>
+          </div>
+          <div v-else class="quiz-answer-wrapper">
+            <label for="quiz-input">정답 입력</label>
+            <input type="text" class="input quiz-answer" id="quiz-input" v-model="quizInput" placeholder="정답을 입력하고 Enter를 누르세요" @keydown.enter="onAnswerCheck">
+          </div>
+        </div>
       </div>
+
       <button class="button is-danger exit-btn" @click="exitRoom">게임 나가기</button>
-      <div class="time">
-        <div class="remain-wrapper">
-          <span class="remain-title"><i class="fa fa-clock-o" aria-hidden="true"></i></span>
-          <span :class="['remain-time', numTime < 60 ? 'is-danger': '']">{{time}}</span>
-        </div>
-        <div>
-          <span class="desc">
-            {{ numTime > 120 
-            ? '시작 후 60초가 지나면 턴 넘기기 버튼이 활성화 됩니다.' 
-            : '남은 시간이 0이 되면 턴이 자동으로 넘어갑니다.' }}
-          </span>
-        </div>
-      </div>
-      <button class="button is-normal pass-btn is-light" v-if="writerNickName === nickName" :disabled="numTime > 120" @click="passTurn">턴 넘기기</button>
     </div>
   </div>
 </template>
@@ -331,30 +337,33 @@ export default {
   padding: 0;
   margin-bottom: 0;
 }
-.tool-bar{
+.menu {
   position: absolute;
-  top: 0;
-  left: 0;
-  background: #eee;
-  padding: 5px;
+  display: flex;
+  padding: 15px;
+  width: 100%;
+  background-color: rgba(238, 238, 238, 0.4);
+}
+.tool-bar{
+  flex-basis: 35%;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 1px;
 }
 .black, .yellow, .green, .red, .blue{
   text-indent: -9999px;
   overflow: hidden;
-  width: 36px;
-  height: 36px;
-  margin-left: 5px;
+  flex-basis: 42px;
+  height: 42px;
 }
 .black.circle{
   border-radius: 50%;
-  margin-left: 5px;
 }
 
 .erase, .all-erase {
-  margin-left: 5px;
+  height: 42px;
 }
 .black{
-  margin-left: 0;
   background: black;
 }
 .yellow{
@@ -370,16 +379,14 @@ export default {
   background: blue;
 }
 .button-start{
-  left: 50%;
-  transform: translateX(-50%);
+  width: 220px;
 }
 .quiz-group{
-  z-index: 1000;
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 5px 5px;
   border-radius: 10px;
+  padding-top: 1px;
+  flex-basis: 35%;
+  display: flex;
+  justify-content: flex-end;
 }
 .center{
   position: absolute;
@@ -391,20 +398,31 @@ export default {
   transform: translate(-50%, -50%);
   width: 220px;
 }
+.quiz-window-wrapper{
+  display: flex;
+  justify-content: flex-end;
+  flex-basis: 100%;
+}
+.quiz-window{
+  flex-basis: 50%;
+}
 .quiz-window, .quiz-answer-wrapper{
   border: 3px solid orange;
   border-radius: 10px;
   display: flex;
   font-size: 18px;
-  
 }
 .quiz-title{
   background: orange;
   color: #fff;
   padding: 5px;
+  text-align: center;
+  flex-basis: 30%;
 }
 .quiz-content{
   padding: 5px;
+  text-align: center;
+  flex-basis: 70%;
 }
 .quiz-answer{
   width: 250px;
@@ -418,8 +436,8 @@ export default {
 }
 .exit-btn{
   position: absolute;
-  right: 5px;
-  bottom: 5px;
+  right: 10px;
+  bottom: 10px;
 }
 [for="quiz-input"]{
   height: 36px;
@@ -432,15 +450,13 @@ export default {
   background-color: orange;
 }
 .time {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  flex-basis: 30%;
 }
 .desc {
   display: block;
   font-size: 14px;
-  line-height: 1;
+  line-height: 1.2;
+  text-align: center;
 }
 .remain-title, .remain-time{
   display: inline-block;
@@ -452,16 +468,15 @@ export default {
   width: 80px;
 }
 .pass-btn {
-  position: absolute;
-  right: 5px;
-  top: 53px;
+  height: 43px;
+  margin-right: 15px;
 }
 .remain-wrapper{
   margin: 0 auto;
   width: 110px;
 }
 .remain-title i, .remain-time {
-  font-size: 30px;
+  font-size: 28px;
   line-height: 1;
   vertical-align: middle
 }

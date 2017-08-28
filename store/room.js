@@ -52,7 +52,7 @@ export default {
     },
     async getRoom({commit}, roomName){
       let {data} = await axios.get(`/api/roomList/${roomName}`);
-      console.log('get room data: ', data);
+      return data;
     },
     // 방 이름 중복 확인
     async chkRoomName({state, commit, dispatch, rootState}, inputRoomName){

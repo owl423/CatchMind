@@ -279,9 +279,9 @@ export default {
       }
     },
     clearBoard(emit){
+      if(this.nickName !== this.writerNickName) return;
       this.context.clearRect(0, 0, canvas.width, canvas.height);
       if(!emit) return ;
-      if(this.nickName !== this.writerNickName) return;
       let roomName = this.roomName;
       this.socket.emit('clearBoard', {roomName});
     },
@@ -384,7 +384,7 @@ export default {
 .quiz-group{
   border-radius: 10px;
   padding-top: 1px;
-  flex-basis: 35%;
+  flex-basis: 30%;
   display: flex;
   justify-content: flex-end;
 }

@@ -13,7 +13,7 @@
               <span class="room-title">방제 : {{room.roomName}}</span>
               <span class="room-master">방장 : {{room.masterUser}}</span> 
               <span class="room-user-count">현재 인원: {{room.userList.length}}</span>
-              <a :href="`/${room.roomName}`" class="button is-small room-enter-btn" @click.prevent="enterRoom(room.roomName)">입장</a>
+              <a :href="`/${room.roomName}`" class="button is-small room-enter-btn" @click.prevent.stop="enterRoom(room.roomName)">입장</a>
             </a>
           </li>
         </ul>
@@ -56,7 +56,8 @@ export default {
   // 메서드
   methods: {
     ...mapActions([
-      'getRoomList'
+      'getRoomList',
+      'getRoom'
     ]),
     ...mapMutations([
       'setIsRoomCreate',
@@ -65,7 +66,12 @@ export default {
     createRoom(){
       this.$router.push({path: '/room-create'});
     },
-    enterRoom(roomName){
+    async enterRoom(roomName){
+      let data = await this.getRoom(roomName);
+      if(data.room === null){
+        alert(data.result);
+        return;
+      }
       this.setIsRoomCreate(true);
       this.setRoomName(roomName);
       this.$router.push({path: `/room-list/${roomName}`});

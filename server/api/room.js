@@ -38,7 +38,7 @@ router.post('/roomList',function(req, res){
     });
   }
 });
-router.get('roomList/:roomName', function(req, res){
+router.get('/roomList/:roomName', function(req, res){
   const room = roomList.find((room)=>room.roomName === req.params.roomName);
   if (room){
     res.json({
@@ -47,7 +47,7 @@ router.get('roomList/:roomName', function(req, res){
   } else {
     res.json({
       room: null,
-      result: '해당 roomName을 가진 room이 존재하지 않습니다.'
+      result: '방이 존재하지 않습니다. 방 목록을 새로고침 해주세요'
     });
   }
 });
